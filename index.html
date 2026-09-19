@@ -32,8 +32,9 @@
       display: flex; justify-content: space-between; align-items: center;
       background: var(--surface); padding: 14px 20px; border-radius: var(--radius);
       border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 20px;
+      flex-wrap: wrap; gap: 12px;
     }
-    .brand { font-size: 19px; font-weight: 800; color: #1e1b4b; display: flex; align-items: center; gap: 8px; }
+    .brand { font-size: 19px; font-weight: 800; color: #1e1b4b; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .badge { font-size: 11px; padding: 4px 8px; border-radius: 999px; background: #ecfdf5; color: #047857; font-weight: 700; border: 1px solid #a7f3d0; }
     
     .btn {
@@ -47,6 +48,7 @@
     .btn-outline:hover { background: #f1f5f9; }
     .btn-success { background: var(--success); color: #fff; }
     .btn-danger { background: #fee2e2; color: #b91c1c; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
     
     /* Gate Screen (Role Selector) */
     .auth-card {
@@ -60,11 +62,6 @@
       outline: none; font-size: 14px;
     }
     .form-group input:focus, .form-group select:focus { border-color: var(--primary); ring: 2px rgba(79, 70, 229, 0.2); }
-    
-    /* Tabs & Controls */
-    .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid var(--border); }
-    .tab-btn { padding: 10px 18px; border: none; background: transparent; font-weight: 700; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; }
-    .tab-btn.active { color: var(--primary); border-color: var(--primary); }
     
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); text-align: center; }
@@ -93,7 +90,7 @@
     #toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; display: none; z-index: 100; }
   </style>
 
-  <!-- Firebase v9 Compat SDKs -->
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
@@ -107,8 +104,10 @@
       <span id="portalTitle">Shyam Coaching Portal</span>
       <span class="badge">Live Cloud</span>
     </div>
-    <div id="topNavControls">
-      <button class="btn btn-outline" onclick="showPortalGate()">🔄 Switch Role / Logout</button>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <button class="btn btn-outline btn-sm admin-only" style="display: none;" onclick="openNameModal()">✏️ Edit Name</button>
+      <button class="btn btn-outline btn-sm admin-only" style="display: none;" onclick="openPinModal()">🔑 Change PIN</button>
+      <button class="btn btn-outline btn-sm" onclick="showPortalGate()">🔄 Switch Role / Logout</button>
     </div>
   </div>
 
@@ -123,18 +122,18 @@
         <button class="btn btn-outline" style="padding: 14px;" onclick="renderParentLoginForm()">👨‍👩‍👧 Parent / Student View</button>
       </div>
 
-      <!-- Admin PIN Form -->
-      <div id="adminPinBox" style="display: none; margin-top: 24px; border-top: 1px solid var(--border); pt: 16px;">
-        <div class="form-group" style="margin-top: 16px;">
-          <label>Enter Admin PIN (Default: 1234)</label>
+      <!-- Admin PIN Form (बिना डिफॉल्ट पासवर्ड दिखाए) -->
+      <div id="adminPinBox" style="display: none; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
+        <div class="form-group">
+          <label>Admin Security PIN</label>
           <input type="password" id="adminPinInput" placeholder="Enter security PIN">
         </div>
         <button class="btn btn-primary" style="width: 100%;" onclick="validateAdminPin()">Login as Admin</button>
       </div>
 
       <!-- Parent Lookup Form -->
-      <div id="parentLookupBox" style="display: none; margin-top: 24px; border-top: 1px solid var(--border); pt: 16px;">
-        <div class="form-group" style="margin-top: 16px;">
+      <div id="parentLookupBox" style="display: none; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
+        <div class="form-group">
           <label>Student Roll Number</label>
           <input type="number" id="lookupRoll" placeholder="e.g. 5">
         </div>
@@ -153,7 +152,7 @@
       <div style="display: flex; gap: 10px; align-items: center;">
         <label style="font-weight: 700; font-size: 13px;">Batch:</label>
         <select id="adminBatchFilter" onchange="renderAdminStudents()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);"></select>
-        <button class="btn btn-outline" style="padding: 5px 10px; font-size: 12px;" onclick="openBatchModal()">⚙️ Batches</button>
+        <button class="btn btn-outline btn-sm" onclick="openBatchModal()">⚙️ Batches</button>
       </div>
       <div>
         <button class="btn btn-primary" onclick="openAddStudentModal()">➕ Add Student</button>
@@ -235,6 +234,40 @@
 
 <!-- MODALS -->
 
+<!-- Modal: Change Coaching Name -->
+<div class="modal-backdrop" id="modalChangeName">
+  <div class="modal-box">
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">🏫 Edit Coaching Center Name</h3>
+    <div class="form-group">
+      <label>Institute Name</label>
+      <input type="text" id="inputInstituteName" placeholder="e.g. Shyam Coaching Classes">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap: 8px; margin-top: 16px;">
+      <button class="btn btn-outline" onclick="closeModal('modalChangeName')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveInstituteName()">Save Name</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Change Admin Security PIN -->
+<div class="modal-backdrop" id="modalChangePin">
+  <div class="modal-box">
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">🔑 Reset Admin Security PIN</h3>
+    <div class="form-group">
+      <label>Enter Current PIN</label>
+      <input type="password" id="inputCurrentPin" placeholder="Current PIN">
+    </div>
+    <div class="form-group">
+      <label>Enter New PIN</label>
+      <input type="password" id="inputNewPin" placeholder="New PIN">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap: 8px; margin-top: 16px;">
+      <button class="btn btn-outline" onclick="closeModal('modalChangePin')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewAdminPin()">Update PIN</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Add Student -->
 <div class="modal-backdrop" id="modalAddStudent">
   <div class="modal-box">
@@ -315,8 +348,7 @@
 <div id="toast"></div>
 
 <script>
-  // ================= 1. FRESH FIREBASE CONFIG =================
-  // Agar aap naya Firebase project banate hain toh apni details yahan replace karein:
+  // Firebase Configuration
   const firebaseConfig = {
     apiKey: "AIzaSyDxNd0uOSyZ9HURq9XLLktAYPWU_CDzZTA",
     authDomain: "coachingattendance-c173d.firebaseapp.com",
@@ -329,13 +361,13 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // State Management
-  const MASTER_ADMIN_PIN = "1234"; // Admin PIN
+  // App State
+  let currentAdminPin = "1234";
+  let coachingName = localStorage.getItem("portal_coaching_name") || "Shyam Coaching Portal";
   let activeBatches = ["Class 10", "Class 9", "Class 8", "Class 7"];
   let allStudents = [];
   let currentParentStudent = null;
 
-  // Helpers
   function showToast(msg) {
     const t = document.getElementById("toast");
     t.textContent = msg;
@@ -345,13 +377,78 @@
   function openModal(id) { document.getElementById(id).classList.add("open"); }
   function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
-  // ================= 2. GATE & ROLE NAVIGATION =================
+  // Sync Settings from Firestore
+  function initSettings() {
+    db.collection("settings").doc("portalConfig").get().then(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        if (data.adminPin) currentAdminPin = data.adminPin;
+        if (data.name) {
+          coachingName = data.name;
+          document.getElementById("portalTitle").textContent = coachingName;
+        }
+      } else {
+        db.collection("settings").doc("portalConfig").set({
+          adminPin: "1234",
+          name: coachingName
+        });
+      }
+    });
+    document.getElementById("portalTitle").textContent = coachingName;
+  }
+  initSettings();
+
+  // Coaching Name Controls
+  function openNameModal() {
+    document.getElementById("inputInstituteName").value = coachingName;
+    openModal("modalChangeName");
+  }
+
+  async function saveInstituteName() {
+    const newName = document.getElementById("inputInstituteName").value.trim();
+    if (!newName) return showToast("Name cannot be empty!");
+
+    coachingName = newName;
+    document.getElementById("portalTitle").textContent = coachingName;
+    localStorage.setItem("portal_coaching_name", coachingName);
+
+    await db.collection("settings").doc("portalConfig").set({ name: newName }, { merge: true });
+    closeModal("modalChangeName");
+    showToast("Coaching name updated successfully!");
+  }
+
+  // Admin PIN Reset Controls
+  function openPinModal() {
+    document.getElementById("inputCurrentPin").value = "";
+    document.getElementById("inputNewPin").value = "";
+    openModal("modalChangePin");
+  }
+
+  async function saveNewAdminPin() {
+    const cur = document.getElementById("inputCurrentPin").value.trim();
+    const next = document.getElementById("inputNewPin").value.trim();
+
+    if (cur !== currentAdminPin) {
+      return showToast("Current PIN is incorrect!");
+    }
+    if (!next || next.length < 4) {
+      return showToast("New PIN must be at least 4 digits!");
+    }
+
+    currentAdminPin = next;
+    await db.collection("settings").doc("portalConfig").set({ adminPin: next }, { merge: true });
+    closeModal("modalChangePin");
+    showToast("Admin PIN reset successfully!");
+  }
+
+  // Gate & Role Navigation
   function showPortalGate() {
     document.getElementById("gateSection").style.display = "block";
     document.getElementById("adminSection").style.display = "none";
     document.getElementById("parentSection").style.display = "none";
     document.getElementById("adminPinBox").style.display = "none";
     document.getElementById("parentLookupBox").style.display = "none";
+    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
   }
 
   function renderAdminLoginForm() {
@@ -366,9 +463,10 @@
 
   function validateAdminPin() {
     const entered = document.getElementById("adminPinInput").value.trim();
-    if (entered === MASTER_ADMIN_PIN) {
+    if (entered === currentAdminPin) {
       document.getElementById("gateSection").style.display = "none";
       document.getElementById("adminSection").style.display = "block";
+      document.querySelectorAll(".admin-only").forEach(el => el.style.display = "inline-flex");
       showToast("✅ Admin access granted!");
       loadBatches();
       listenToStudents();
@@ -405,7 +503,7 @@
       .catch(err => showToast("Error: " + err.message));
   }
 
-  // ================= 3. BATCH MANAGEMENT =================
+  // Batches
   async function loadBatches() {
     try {
       const snap = await db.collection("batches").orderBy("name").get();
@@ -454,7 +552,7 @@
     showToast(`Batch "${name}" created!`);
   }
 
-  // ================= 4. REALTIME DATA & ADMIN VIEW =================
+  // Student CRUD & Realtime
   function listenToStudents() {
     db.collection("students").onSnapshot(snap => {
       allStudents = [];
@@ -560,7 +658,7 @@
     showToast(`Attendance verified for ${name}`);
   }
 
-  // ================= 5. PARENT DASHBOARD LOGIC =================
+  // Parent Dashboard
   function renderParentDashboard() {
     if (!currentParentStudent) return;
     const s = currentParentStudent;
