@@ -3,126 +3,192 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coaching Portal - Dual Panel (Admin & Parent)</title>
+  <title>Coaching Management Suite - Admin & Parent Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
   <style>
     :root {
       --primary: #4f46e5;
       --primary-hover: #4338ca;
+      --primary-subtle: #eef2ff;
+      --primary-border: #c7d2fe;
       --bg: #f8fafc;
       --surface: #ffffff;
       --border: #e2e8f0;
+      --present: #10b981;
+      --present-subtle: #d1fae5;
+      --present-text: #065f46;
+      --absent: #ef4444;
+      --absent-subtle: #fee2e2;
+      --absent-text: #991b1b;
+      --late: #f59e0b;
+      --late-subtle: #fef3c7;
+      --late-text: #92400e;
+      --holiday: #8b5cf6;
+      --holiday-subtle: #ede9fe;
       --text: #0f172a;
-      --muted: #64748b;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
+      --text-muted: #64748b;
       --radius: 12px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.12);
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; }
-    .container { max-width: 1080px; margin: 0 auto; }
-    
-    /* Global Navigation */
+    body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; line-height: 1.45; }
+    .container { max-width: 1140px; margin: 0 auto; }
+
+    /* Top Bar */
     .top-bar {
       display: flex; justify-content: space-between; align-items: center;
       background: var(--surface); padding: 14px 20px; border-radius: var(--radius);
-      border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 20px;
+      border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 18px;
       flex-wrap: wrap; gap: 12px;
     }
     .brand { font-size: 19px; font-weight: 800; color: #1e1b4b; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .badge { font-size: 11px; padding: 4px 8px; border-radius: 999px; background: #ecfdf5; color: #047857; font-weight: 700; border: 1px solid #a7f3d0; }
-    
+
     .btn {
       padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
-      cursor: pointer; border: 1px solid transparent; transition: all 0.2s;
+      cursor: pointer; border: 1px solid transparent; transition: all 0.15s ease;
       display: inline-flex; align-items: center; gap: 6px; justify-content: center;
+      text-decoration: none; font-family: inherit;
     }
-    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25); }
     .btn-primary:hover { background: var(--primary-hover); }
     .btn-outline { background: var(--surface); border-color: var(--border); color: #334155; }
-    .btn-outline:hover { background: #f1f5f9; }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-danger { background: #fee2e2; color: #b91c1c; }
-    .btn-sm { padding: 5px 10px; font-size: 12px; }
-    
-    /* Gate Screen (Role Selector) */
+    .btn-outline:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .btn-success { background: var(--present); color: #fff; }
+    .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+    .btn-holiday { background: var(--holiday-subtle); color: var(--holiday); border-color: #ddd6fe; }
+    .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+
+    /* Auth Gate Card */
     .auth-card {
-      max-width: 440px; margin: 50px auto; background: var(--surface); padding: 32px 24px;
+      max-width: 440px; margin: 40px auto; background: var(--surface); padding: 32px 24px;
       border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); text-align: center;
     }
-    .form-group { text-align: left; margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; color: #334155; }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
-      outline: none; font-size: 14px;
+
+    /* Tabs Bar */
+    .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid var(--border); overflow-x: auto; }
+    .tab-btn {
+      padding: 10px 18px; border: none; background: transparent; font-weight: 700; font-size: 13px;
+      color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap;
     }
-    .form-group input:focus, .form-group select:focus { border-color: var(--primary); ring: 2px rgba(79, 70, 229, 0.2); }
-    
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); text-align: center; }
-    .stat-card .num { font-size: 24px; font-weight: 800; margin-top: 4px; }
-    
+    .tab-btn.active { color: var(--primary); border-color: var(--primary); background: var(--primary-subtle); }
+
+    /* Controls Panel */
+    .controls-panel {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px; align-items: end; margin-bottom: 18px; background: var(--surface);
+      padding: 16px; border-radius: var(--radius); border: 1px solid var(--border);
+    }
+    .filter-box { display: flex; flex-direction: column; gap: 4px; }
+    .filter-box label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+    select, input[type="text"], input[type="number"], input[type="tel"], input[type="date"], input[type="month"], textarea {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px;
+      outline: none; background: #fff; width: 100%; font-family: inherit; color: var(--text);
+    }
+    select:focus, input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 14px 16px; border-radius: var(--radius); text-align: center; }
+    .stat-caption { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .stat-number { font-size: 22px; font-weight: 800; margin-top: 4px; }
+
     /* Tables */
     .table-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 650px; }
-    th, td { padding: 12px 16px; text-align: left; font-size: 13px; border-bottom: 1px solid var(--border); }
-    th { background: #f8fafc; font-weight: 700; color: var(--muted); text-transform: uppercase; font-size: 11px; }
-    
-    /* Parent Progress Card */
-    .progress-sheet {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-      padding: 24px; max-width: 600px; margin: 0 auto; box-shadow: var(--shadow);
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th { background: #f8fafc; padding: 12px 14px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: left; }
+    td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:hover td { background-color: #fafbfc; }
+
+    /* Pills & Status Badges */
+    .btn-group-status { display: inline-flex; gap: 4px; }
+    .pill-btn {
+      padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;
+      border: 1px solid var(--border); background: #fff; color: var(--text-muted);
     }
-    .progress-header { border-bottom: 2px solid var(--border); padding-bottom: 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
-    .kpi-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
-    
-    /* Modal */
-    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+    .pill-btn.active-p { background: var(--present-subtle); border-color: var(--present); color: var(--present-text); }
+    .pill-btn.active-l { background: var(--late-subtle); border-color: var(--late); color: var(--late-text); }
+    .pill-btn.active-a { background: var(--absent-subtle); border-color: var(--absent); color: var(--absent-text); }
+    .tag-paid { background: var(--present-subtle); border: 1px solid #86efac; color: var(--present-text); font-weight: 700; }
+    .tag-due { background: var(--absent-subtle); border: 1px solid #fca5a5; color: var(--absent-text); font-weight: 700; }
+    .badge-na { background: #f1f5f9; color: #64748b; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600; border: 1px dashed #cbd5e1; }
+    .badge-score { padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; display: inline-block; }
+    .badge-pass { background: var(--present-subtle); color: var(--present-text); }
+    .badge-fail { background: var(--absent-subtle); color: var(--absent-text); }
+    .badge-absent-test { background: #fee2e2; color: #991b1b; }
+
+    .wa-link {
+      display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px;
+      background: #25d366; color: #fff; text-decoration: none; border-radius: 6px;
+      font-size: 11px; font-weight: 700;
+    }
+    .wa-link:hover { background: #1ebe5d; }
+    .wa-link-due { background: #f59e0b; }
+    .wa-link-due:hover { background: #d97706; }
+
+    /* Modals */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); align-items: center; justify-content: center; z-index: 200; padding: 16px; backdrop-filter: blur(4px); }
     .modal-backdrop.open { display: flex; }
-    .modal-box { background: var(--surface); border-radius: var(--radius); padding: 24px; max-width: 460px; width: 100%; }
-    
-    #toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; display: none; z-index: 100; }
+    .modal-dialog { background: #fff; border-radius: var(--radius); padding: 24px; width: 100%; max-width: 480px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto; }
+    .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 12px; font-weight: 700; color: #334155; }
+    .form-group small { font-size: 11px; color: var(--text-muted); }
+
+    /* Slips & Printable Sheets */
+    .slip-card { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; background: #fafafa; margin: 14px 0; }
+    .slip-header { text-align: center; margin-bottom: 14px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+    .slip-header h2 { font-size: 17px; font-weight: 800; color: #1e1b4b; text-transform: uppercase; }
+    .slip-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px dotted #e2e8f0; }
+    .slip-grand-total { display: flex; justify-content: space-between; padding: 10px 0 4px; font-size: 16px; font-weight: 800; color: #1e1b4b; }
+
+    #toastBar { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; display: none; z-index: 999; border-left: 4px solid var(--primary); }
+
+    @media print {
+      body * { visibility: hidden !important; }
+      .print-target, .print-target * { visibility: visible !important; }
+      .print-target { position: fixed !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 30px !important; background: #fff !important; }
+    }
   </style>
 
-  <!-- Firebase Scripts -->
+  <!-- Firebase v9 Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <div class="container">
-  <!-- Top Navigation Bar -->
+  <!-- Top Bar -->
   <div class="top-bar">
     <div class="brand">
       <span>📖</span>
-      <span id="portalTitle">Shyam Coaching Portal</span>
+      <span id="displayCoachingName">Shyam Coaching Classes</span>
       <span class="badge">Live Cloud</span>
     </div>
     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-      <button class="btn btn-outline btn-sm admin-only" style="display: none;" onclick="openNameModal()">✏️ Edit Name</button>
+      <button class="btn btn-outline btn-sm admin-only" style="display: none;" onclick="openCoachingNameModal()">✏️ Edit Name</button>
       <button class="btn btn-outline btn-sm admin-only" style="display: none;" onclick="openPinModal()">🔑 Change PIN</button>
+      <button class="btn btn-outline btn-sm admin-only" style="display: none;" onclick="openBatchManagementModal()">🏷️ Manage Batches</button>
       <button class="btn btn-outline btn-sm" onclick="showPortalGate()">🔄 Switch Role / Logout</button>
     </div>
   </div>
 
-  <!-- GATE SCREEN: Role Selection -->
+  <!-- GATE / ROLE SELECTOR SCREEN -->
   <div id="gateSection">
     <div class="auth-card">
-      <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Select Portal View</h2>
-      <p style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Please choose how you want to log in</p>
+      <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Select Portal Access</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">Choose your login mode to proceed</p>
       
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <button class="btn btn-primary" style="padding: 14px;" onclick="renderAdminLoginForm()">🔒 Teacher / Admin Access</button>
         <button class="btn btn-outline" style="padding: 14px;" onclick="renderParentLoginForm()">👨‍👩‍👧 Parent / Student View</button>
       </div>
 
-      <!-- Admin PIN Form (बिना डिफॉल्ट पासवर्ड दिखाए) -->
+      <!-- Admin PIN Input (Default text permanently hidden) -->
       <div id="adminPinBox" style="display: none; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
         <div class="form-group">
           <label>Admin Security PIN</label>
@@ -135,10 +201,10 @@
       <div id="parentLookupBox" style="display: none; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
         <div class="form-group">
           <label>Student Roll Number</label>
-          <input type="number" id="lookupRoll" placeholder="e.g. 5">
+          <input type="number" id="lookupRoll" placeholder="e.g. 1">
         </div>
         <div class="form-group">
-          <label>Registered Mobile Number</label>
+          <label>Registered WhatsApp Mobile Number</label>
           <input type="tel" id="lookupPhone" placeholder="10-digit mobile number">
         </div>
         <button class="btn btn-primary" style="width: 100%;" onclick="validateParentAccess()">Check Student Record</button>
@@ -146,86 +212,132 @@
     </div>
   </div>
 
-  <!-- ADMIN PANEL VIEW -->
+  <!-- ADMIN MASTER PANEL -->
   <div id="adminSection" style="display: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <label style="font-weight: 700; font-size: 13px;">Batch:</label>
-        <select id="adminBatchFilter" onchange="renderAdminStudents()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);"></select>
-        <button class="btn btn-outline btn-sm" onclick="openBatchModal()">⚙️ Batches</button>
+    <!-- Navigation Tabs -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" id="navAttendance" onclick="switchAdminTab('attendance')">📋 Attendance</button>
+      <button class="tab-btn" id="navFees" onclick="switchAdminTab('fees')">💰 Fee Tracker</button>
+      <button class="tab-btn" id="navTests" onclick="switchAdminTab('tests')">📝 Tests & Results</button>
+    </nav>
+
+    <!-- Toolbar Controls -->
+    <div class="controls-panel">
+      <!-- Batch Selector -->
+      <div class="filter-box">
+        <label for="batchFilter">Batch / Class</label>
+        <select id="batchFilter" onchange="handleBatchChange()"></select>
       </div>
-      <div>
-        <button class="btn btn-primary" onclick="openAddStudentModal()">➕ Add Student</button>
+
+      <!-- Search Filter -->
+      <div class="filter-box">
+        <label for="searchFilter">🔍 Search</label>
+        <input type="text" id="searchFilter" placeholder="Name or roll..." oninput="renderActiveAdminView()">
+      </div>
+
+      <!-- Attendance Date & Holiday Controls -->
+      <div class="filter-box" id="ctrlDateAttendance">
+        <label for="attendanceDate">Date</label>
+        <input type="date" id="attendanceDate" onchange="loadDateAttendance()">
+      </div>
+
+      <div class="filter-box" id="ctrlHolidayBtn" style="display: flex; flex-direction: row; gap: 6px;">
+        <button class="btn btn-holiday btn-sm" id="btnToggleHoliday" style="flex: 1;" onclick="toggleCurrentDateHoliday()">🏖️ Mark Holiday</button>
+      </div>
+
+      <!-- Fee Month Picker -->
+      <div class="filter-box" id="ctrlMonthPicker" style="display: none;">
+        <label for="selectedMonth">Fee Month</label>
+        <input type="month" id="selectedMonth" onchange="loadFeeData()">
+      </div>
+
+      <!-- Test Selector Control -->
+      <div class="filter-box" id="ctrlTestSelector" style="display: none;">
+        <label for="activeTestSelect">Select Test</label>
+        <select id="activeTestSelect" onchange="handleActiveTestChange()"></select>
+      </div>
+
+      <div class="filter-box" style="display: flex; gap: 6px;">
+        <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="openAddStudentModal()">➕ Add Student</button>
+        <button class="btn btn-outline btn-sm" id="btnNewTest" style="display: none;" onclick="openCreateTestModal()">➕ Create Test</button>
       </div>
     </div>
 
-    <!-- Admin KPI Cards -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div style="font-size: 12px; color: var(--muted); font-weight: 600;">Total In Batch</div>
-        <div class="num" id="kpiTotalStudents">0</div>
-      </div>
-      <div class="stat-card">
-        <div style="font-size: 12px; color: var(--muted); font-weight: 600;">Total Fee Collected</div>
-        <div class="num" style="color: var(--success);" id="kpiFeesPaid">₹0</div>
-      </div>
-      <div class="stat-card">
-        <div style="font-size: 12px; color: var(--muted); font-weight: 600;">Pending Fee Dues</div>
-        <div class="num" style="color: var(--danger);" id="kpiFeesPending">₹0</div>
-      </div>
+    <!-- Attendance KPIs -->
+    <div class="stats-grid" id="statsAttendance">
+      <div class="stat-card"><div class="stat-caption">Active in Batch</div><div class="stat-number" id="kpiActiveStudents">0</div></div>
+      <div class="stat-card"><div class="stat-caption">Present Today</div><div class="stat-number" style="color: var(--present);" id="kpiPresentCount">0</div></div>
+      <div class="stat-card"><div class="stat-caption">Absent Today</div><div class="stat-number" style="color: var(--absent);" id="kpiAbsentCount">0</div></div>
+      <div class="stat-card"><div class="stat-caption">Attendance Rate</div><div class="stat-number" style="color: var(--primary);" id="kpiAttendanceRate">0%</div></div>
     </div>
 
-    <!-- Admin Student Table -->
+    <!-- Fee KPIs -->
+    <div class="stats-grid" id="statsFees" style="display: none;">
+      <div class="stat-card"><div class="stat-caption">Enrolled This Month</div><div class="stat-number" id="kpiFeeEligible">0</div></div>
+      <div class="stat-card"><div class="stat-caption">Fee Collected</div><div class="stat-number" style="color: var(--present);" id="kpiFeeCollected">₹0</div></div>
+      <div class="stat-card"><div class="stat-caption">Pending Dues</div><div class="stat-number" style="color: var(--absent);" id="kpiFeePending">₹0</div></div>
+      <div class="stat-card"><div class="stat-caption">Paid Students</div><div class="stat-number" style="color: var(--primary);" id="kpiFeeRatio">0 / 0</div></div>
+    </div>
+
+    <!-- Test KPIs -->
+    <div class="stats-grid" id="statsTests" style="display: none;">
+      <div class="stat-card"><div class="stat-caption">Max Marks</div><div class="stat-number" id="kpiTestMax">--</div></div>
+      <div class="stat-card"><div class="stat-caption">Average Score</div><div class="stat-number" style="color: var(--primary);" id="kpiTestAvg">0%</div></div>
+      <div class="stat-card"><div class="stat-caption">Top Score</div><div class="stat-number" style="color: var(--present);" id="kpiTestHighest">0</div></div>
+      <div class="stat-card"><div class="stat-caption">Pass Rate (≥40%)</div><div class="stat-number" id="kpiTestPassRate">0%</div></div>
+    </div>
+
+    <!-- Main Table Container -->
     <div class="table-box">
       <table>
-        <thead>
-          <tr>
-            <th>Roll</th>
-            <th>Name & Details</th>
-            <th>Monthly Fee</th>
-            <th>Fee Status</th>
-            <th>Quick Attendance</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="adminStudentTableBody"></tbody>
+        <thead id="adminTableHeader"></thead>
+        <tbody id="adminTableBody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- PARENT PANEL VIEW -->
+  <!-- PARENT / STUDENT PANEL -->
   <div id="parentSection" style="display: none;">
-    <div class="progress-sheet">
-      <div class="progress-header">
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 650px; margin: 0 auto; box-shadow: var(--shadow);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 14px; margin-bottom: 16px;">
         <div>
           <h2 id="pViewName" style="font-size: 20px; font-weight: 800; color: #1e1b4b;">Student Name</h2>
-          <p id="pViewClassRoll" style="font-size: 13px; color: var(--muted);">Class 10 | Roll #1</p>
+          <p id="pViewClassRoll" style="font-size: 13px; color: var(--text-muted);">Class -- | Roll #--</p>
         </div>
-        <button class="btn btn-outline" onclick="openParentEditModal()">✏️ Edit Info</button>
+        <button class="btn btn-outline btn-sm" onclick="openParentEditModal()">✏️ Update Basic Details</button>
       </div>
 
-      <div class="kpi-row">
-        <div class="kpi-box">
-          <div style="font-size: 12px; color: var(--muted); font-weight: 700;">FEE STATUS</div>
-          <div id="pViewFeeStatus" style="font-size: 18px; font-weight: 800; margin-top: 4px;">PAID ✅</div>
+      <!-- Quick Status -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+        <div style="background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">TUITION FEE STATUS</div>
+          <div id="pViewFeeStatus" style="font-size: 16px; font-weight: 800; margin-top: 4px;">PAID ✅</div>
         </div>
-        <div class="kpi-box">
-          <div style="font-size: 12px; color: var(--muted); font-weight: 700;">MONTHLY TUITION</div>
-          <div id="pViewFeeAmount" style="font-size: 18px; font-weight: 800; margin-top: 4px; color: var(--primary);">₹1,000</div>
+        <div style="background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">MONTHLY FEE</div>
+          <div id="pViewFeeAmount" style="font-size: 16px; font-weight: 800; margin-top: 4px; color: var(--primary);">₹0</div>
         </div>
       </div>
 
-      <div style="background: #fafafa; border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 14px; font-size: 13px; line-height: 1.8;">
-        <div><strong>Father's Name:</strong> <span id="pViewFather">--</span></div>
+      <!-- Profile Details -->
+      <div style="background: #fafafa; border: 1px solid var(--border); border-radius: 12px; padding: 14px; font-size: 13px; line-height: 1.8; margin-bottom: 18px;">
+        <div><strong>Admission Date:</strong> <span id="pViewAdmDate">--</span></div>
         <div><strong>Date of Birth (DOB):</strong> <span id="pViewDob">--</span></div>
+        <div><strong>Father / Guardian:</strong> <span id="pViewFather">--</span></div>
         <div><strong>Primary Mobile:</strong> <span id="pViewPhone">--</span></div>
         <div><strong>Alternate Contact:</strong> <span id="pViewAltPhone">--</span></div>
-        <div><strong>Residential Area:</strong> <span id="pViewAddress">--</span></div>
+        <div><strong>Residential Address:</strong> <span id="pViewAddress">--</span></div>
       </div>
 
-      <div style="margin-top: 20px; text-align: center;">
-        <a id="pTeacherWhatsapp" href="#" target="_blank" class="btn btn-success" style="width: 100%; padding: 12px;">
-          💬 Chat with Teacher on WhatsApp
+      <!-- Recent Test Results on Parent View -->
+      <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 8px; color: #1e1b4b;">📝 Test & Exam Evaluation</h4>
+      <div id="pViewTestContainer" style="border: 1px solid var(--border); border-radius: 8px; max-height: 200px; overflow-y: auto; background: #fff; margin-bottom: 18px; padding: 8px;">
+        <p style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 12px;">Loading test history...</p>
+      </div>
+
+      <div style="text-align: center;">
+        <a id="pTeacherWhatsappBtn" href="#" target="_blank" class="btn btn-success" style="width: 100%; padding: 12px;">
+          💬 Contact Teacher on WhatsApp
         </a>
       </div>
     </div>
@@ -236,11 +348,12 @@
 
 <!-- Modal: Change Coaching Name -->
 <div class="modal-backdrop" id="modalChangeName">
-  <div class="modal-box">
-    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">🏫 Edit Coaching Center Name</h3>
+  <div class="modal-dialog" style="max-width: 420px;">
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">🏫 Edit Coaching Institute Name</h3>
     <div class="form-group">
       <label>Institute Name</label>
       <input type="text" id="inputInstituteName" placeholder="e.g. Shyam Coaching Classes">
+      <small>Appears on WhatsApp alerts, scorecards, and receipts.</small>
     </div>
     <div style="display:flex; justify-content:flex-end; gap: 8px; margin-top: 16px;">
       <button class="btn btn-outline" onclick="closeModal('modalChangeName')">Cancel</button>
@@ -251,15 +364,15 @@
 
 <!-- Modal: Change Admin Security PIN -->
 <div class="modal-backdrop" id="modalChangePin">
-  <div class="modal-box">
-    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">🔑 Reset Admin Security PIN</h3>
+  <div class="modal-dialog" style="max-width: 420px;">
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">🔑 Reset Admin PIN</h3>
     <div class="form-group">
       <label>Enter Current PIN</label>
-      <input type="password" id="inputCurrentPin" placeholder="Current PIN">
+      <input type="password" id="inputCurrentPin">
     </div>
     <div class="form-group">
-      <label>Enter New PIN</label>
-      <input type="password" id="inputNewPin" placeholder="New PIN">
+      <label>Enter New PIN (min 4 digits)</label>
+      <input type="password" id="inputNewPin">
     </div>
     <div style="display:flex; justify-content:flex-end; gap: 8px; margin-top: 16px;">
       <button class="btn btn-outline" onclick="closeModal('modalChangePin')">Cancel</button>
@@ -268,59 +381,156 @@
   </div>
 </div>
 
+<!-- Modal: Manage Batches -->
+<div class="modal-backdrop" id="modalBatches">
+  <div class="modal-dialog" style="max-width: 440px;">
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">🏷️ Manage Batches & Classes</h3>
+    <div style="display: flex; gap: 6px; margin-bottom: 14px;">
+      <input type="text" id="inputNewBatch" placeholder="e.g. Class 11, Target Batch">
+      <button class="btn btn-primary" onclick="addNewBatch()">Add</button>
+    </div>
+    <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Existing Batches</label>
+    <div id="batchItemsList" style="border: 1px solid var(--border); border-radius: 8px; margin-top: 6px; max-height: 200px; overflow-y: auto;"></div>
+    <div style="display:flex; justify-content: flex-end; margin-top: 16px;">
+      <button class="btn btn-outline" onclick="closeModal('modalBatches')">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Add Student -->
 <div class="modal-backdrop" id="modalAddStudent">
-  <div class="modal-box">
+  <div class="modal-dialog">
     <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">➕ Add New Student</h3>
     <div class="form-group">
       <label>Roll Number *</label>
-      <input type="number" id="newRoll" placeholder="e.g. 1">
+      <input type="number" id="newRoll" placeholder="e.g. 1, 2, 10">
+      <small>Numeric order for automatic attendance list.</small>
     </div>
     <div class="form-group">
       <label>Full Name *</label>
-      <input type="text" id="newName" placeholder="Student's name">
+      <input type="text" id="newName" placeholder="Student name">
     </div>
     <div class="form-group">
       <label>Batch / Class</label>
       <select id="newBatchSelect"></select>
     </div>
     <div class="form-group">
-      <label>Date of Birth (DOB)</label>
+      <label>Admission Date 📅 *</label>
+      <input type="date" id="newAdmissionDate">
+      <small>Attendance, tests, and fee dues begin strictly from this date.</small>
+    </div>
+    <div class="form-group">
+      <label>Date of Birth (DOB) 🎂</label>
       <input type="date" id="newDob">
     </div>
     <div class="form-group">
-      <label>Monthly Fee (₹)</label>
+      <label>Monthly Tuition Fee (₹) *</label>
       <input type="number" id="newFee" value="1000">
     </div>
     <div class="form-group">
       <label>Parent WhatsApp Number *</label>
-      <input type="tel" id="newPhone" placeholder="10-digit mobile">
+      <input type="tel" id="newPhone" placeholder="10-digit mobile number">
     </div>
     <div style="display:flex; justify-content:flex-end; gap: 8px; margin-top: 16px;">
       <button class="btn btn-outline" onclick="closeModal('modalAddStudent')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNewStudent()">Save Student</button>
+      <button class="btn btn-primary" onclick="submitAddStudent()">Save Student</button>
     </div>
   </div>
 </div>
 
-<!-- Modal: Manage Batches -->
-<div class="modal-backdrop" id="modalBatches">
-  <div class="modal-box">
-    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">⚙️ Manage Batches</h3>
-    <div style="display: flex; gap: 6px; margin-bottom: 14px;">
-      <input type="text" id="inputNewBatch" placeholder="e.g. Class 11 - Science" style="flex:1; padding:8px; border:1px solid var(--border); border-radius:8px;">
-      <button class="btn btn-primary" onclick="addBatch()">Add</button>
+<!-- Modal: Create New Test -->
+<div class="modal-backdrop" id="modalCreateTest">
+  <div class="modal-dialog">
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 16px;">📝 Create New Class Test</h3>
+    <div class="form-group">
+      <label>Batch / Class</label>
+      <select id="testBatchSelect"></select>
     </div>
-    <ul id="batchesListUI" style="list-style: none; max-height: 180px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;"></ul>
-    <div style="text-align: right; margin-top: 14px;">
-      <button class="btn btn-outline" onclick="closeModal('modalBatches')">Close</button>
+    <div class="form-group">
+      <label>Subject *</label>
+      <input type="text" id="testSubject" placeholder="e.g. Mathematics, Science">
+    </div>
+    <div class="form-group">
+      <label>Test / Topic Name *</label>
+      <input type="text" id="testTopic" placeholder="e.g. Real Numbers Unit Test">
+    </div>
+    <div class="form-group">
+      <label>Date of Examination *</label>
+      <input type="date" id="testDate">
+    </div>
+    <div class="form-group">
+      <label>Maximum Marks *</label>
+      <input type="number" id="testMaxMarks" value="25">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap: 8px; margin-top: 20px;">
+      <button class="btn btn-outline" onclick="closeModal('modalCreateTest')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCreateTest()">Save Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Printable Fee Receipt -->
+<div class="modal-backdrop" id="modalFeeReceipt">
+  <div class="modal-dialog">
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">🧾 Tuition Fee Receipt</h3>
+    <div id="printableFeeSlip" class="print-target">
+      <div class="slip-card">
+        <div class="slip-header">
+          <h2 class="dynamic-coaching-name">SHYAM COACHING CLASSES</h2>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Official Tuition Fee Payment Receipt Slip</p>
+        </div>
+        <div class="slip-row"><span>Receipt Number:</span><strong id="slipReceiptId">#REC-000000</strong></div>
+        <div class="slip-row"><span>Payment Date:</span><span id="slipPayDate">--/--/----</span></div>
+        <div class="slip-row"><span>Student Name:</span><strong id="slipStudentName">--</strong></div>
+        <div class="slip-row"><span>Roll & Batch:</span><span id="slipRollClass">--</span></div>
+        <div class="slip-row"><span>Fee Cycle / Month:</span><span id="slipFeeMonth">--</span></div>
+        <div class="slip-row"><span>Payment Status:</span><strong style="color: var(--present);">VERIFIED & PAID ✅</strong></div>
+        <div class="slip-grand-total"><span>Amount Received:</span><span style="color: var(--present);" id="slipAmountPaid">₹0</span></div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction: column; gap: 8px; margin-top: 14px;">
+      <a id="slipWhatsappBtn" href="#" target="_blank" class="btn wa-link" style="justify-content: center; font-size: 13px;">📲 Send Receipt on WhatsApp</a>
+      <div style="display:flex; gap: 8px;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="printCustomElement('printableFeeSlip')">🖨️ Print Slip</button>
+        <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('modalFeeReceipt')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Printable Scorecard Slip -->
+<div class="modal-backdrop" id="modalScorecard">
+  <div class="modal-dialog">
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">🏆 Student Test Scorecard</h3>
+    <div id="printableScorecardSlip" class="print-target">
+      <div class="slip-card">
+        <div class="slip-header">
+          <h2 class="dynamic-coaching-name">SHYAM COACHING CLASSES</h2>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Official Evaluation & Performance Slip</p>
+        </div>
+        <div class="slip-row"><span>Student Name:</span><strong id="scStudentName">--</strong></div>
+        <div class="slip-row"><span>Roll & Batch:</span><span id="scRollBatch">--</span></div>
+        <div class="slip-row"><span>Subject:</span><strong id="scSubject">--</strong></div>
+        <div class="slip-row"><span>Topic:</span><span id="scTopic">--</span></div>
+        <div class="slip-row"><span>Exam Date:</span><span id="scExamDate">--/--/----</span></div>
+        <div class="slip-row"><span>Marks Scored:</span><strong id="scMarksScored">0 / 0</strong></div>
+        <div class="slip-row"><span>Percentage:</span><strong id="scPercentage">0%</strong></div>
+        <div class="slip-grand-total"><span>Remark:</span><span id="scGradeRemark" style="color: var(--primary);">Pass</span></div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction: column; gap: 8px; margin-top: 14px;">
+      <a id="scWhatsappBtn" href="#" target="_blank" class="btn wa-link" style="justify-content: center; font-size: 13px;">📲 Send Scorecard on WhatsApp</a>
+      <div style="display:flex; gap: 8px;">
+        <button class="btn btn-outline" style="flex: 1;" onclick="printCustomElement('printableScorecardSlip')">🖨️ Print Scorecard</button>
+        <button class="btn btn-outline" style="flex: 1;" onclick="closeModal('modalScorecard')">Close</button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Modal: Parent Edit Profile -->
 <div class="modal-backdrop" id="modalParentEdit">
-  <div class="modal-box">
+  <div class="modal-dialog">
     <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">✏️ Update Student Information</h3>
     <div class="form-group">
       <label>Date of Birth (DOB) 🎂</label>
@@ -332,11 +542,11 @@
     </div>
     <div class="form-group">
       <label>Alternate Mobile Number</label>
-      <input type="tel" id="editParentAltPhone" placeholder="Secondary contact">
+      <input type="tel" id="editParentAltPhone" placeholder="Secondary phone">
     </div>
     <div class="form-group">
-      <label>Address / Colony</label>
-      <textarea id="editParentAddress" rows="2"></textarea>
+      <label>Residential Area / Colony</label>
+      <textarea id="editParentAddress" rows="2" placeholder="Colony / Area, Jaipur"></textarea>
     </div>
     <div style="display:flex; justify-content:flex-end; gap: 8px; margin-top: 16px;">
       <button class="btn btn-outline" onclick="closeModal('modalParentEdit')">Cancel</button>
@@ -345,7 +555,7 @@
   </div>
 </div>
 
-<div id="toast"></div>
+<div id="toastBar">Alert</div>
 
 <script>
   // Firebase Configuration
@@ -363,13 +573,30 @@
 
   // App State
   let currentAdminPin = "1234";
-  let coachingName = localStorage.getItem("portal_coaching_name") || "Shyam Coaching Portal";
+  let coachingInstituteName = localStorage.getItem("coaching_name") || "Shyam Coaching Classes";
   let activeBatches = ["Class 10", "Class 9", "Class 8", "Class 7"];
-  let allStudents = [];
+  let studentsList = [];
+  let currentActiveTab = "attendance";
+  let currentDayAttendance = {};
+  let currentMonthFeeRecords = {};
+  let holidaysList = {}; // { "YYYY-MM-DD": true }
+
+  let availableTestsList = [];
+  let currentActiveTest = null;
   let currentParentStudent = null;
 
+  // Date Initializations
+  const now = new Date();
+  const todayDateStr = now.toISOString().split("T")[0];
+  const thisMonthStr = todayDateStr.substring(0, 7);
+
+  document.getElementById("attendanceDate").value = todayDateStr;
+  document.getElementById("newAdmissionDate").value = todayDateStr;
+  document.getElementById("selectedMonth").value = thisMonthStr;
+  document.getElementById("testDate").value = todayDateStr;
+
   function showToast(msg) {
-    const t = document.getElementById("toast");
+    const t = document.getElementById("toastBar");
     t.textContent = msg;
     t.style.display = "block";
     setTimeout(() => { t.style.display = "none"; }, 3000);
@@ -377,47 +604,56 @@
   function openModal(id) { document.getElementById(id).classList.add("open"); }
   function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
-  // Sync Settings from Firestore
+  function sanitizePhone(p) {
+    if (!p) return "";
+    return String(p).replace(/\D/g, "").slice(-10);
+  }
+
+  function printCustomElement(elId) {
+    document.querySelectorAll(".print-target").forEach(e => e.classList.remove("print-active"));
+    const t = document.getElementById(elId);
+    if (t) { t.classList.add("print-active"); window.print(); }
+  }
+
+  // ================= SETTINGS & BRANDING =================
   function initSettings() {
     db.collection("settings").doc("portalConfig").get().then(doc => {
       if (doc.exists) {
-        const data = doc.data();
-        if (data.adminPin) currentAdminPin = data.adminPin;
-        if (data.name) {
-          coachingName = data.name;
-          document.getElementById("portalTitle").textContent = coachingName;
+        const d = doc.data();
+        if (d.adminPin) currentAdminPin = d.adminPin;
+        if (d.name) {
+          coachingInstituteName = d.name;
+          updateInstituteNameUI(coachingInstituteName);
         }
       } else {
-        db.collection("settings").doc("portalConfig").set({
-          adminPin: "1234",
-          name: coachingName
-        });
+        db.collection("settings").doc("portalConfig").set({ adminPin: "1234", name: coachingInstituteName });
       }
     });
-    document.getElementById("portalTitle").textContent = coachingName;
+    updateInstituteNameUI(coachingInstituteName);
   }
   initSettings();
 
-  // Coaching Name Controls
-  function openNameModal() {
-    document.getElementById("inputInstituteName").value = coachingName;
+  function updateInstituteNameUI(name) {
+    coachingInstituteName = name;
+    document.getElementById("displayCoachingName").textContent = name;
+    document.querySelectorAll(".dynamic-coaching-name").forEach(el => el.textContent = name.toUpperCase());
+    localStorage.setItem("coaching_name", name);
+  }
+
+  function openCoachingNameModal() {
+    document.getElementById("inputInstituteName").value = coachingInstituteName;
     openModal("modalChangeName");
   }
 
   async function saveInstituteName() {
-    const newName = document.getElementById("inputInstituteName").value.trim();
-    if (!newName) return showToast("Name cannot be empty!");
-
-    coachingName = newName;
-    document.getElementById("portalTitle").textContent = coachingName;
-    localStorage.setItem("portal_coaching_name", coachingName);
-
-    await db.collection("settings").doc("portalConfig").set({ name: newName }, { merge: true });
+    const name = document.getElementById("inputInstituteName").value.trim();
+    if (!name) return showToast("Name cannot be empty!");
+    updateInstituteNameUI(name);
+    await db.collection("settings").doc("portalConfig").set({ name }, { merge: true });
     closeModal("modalChangeName");
-    showToast("Coaching name updated successfully!");
+    showToast("Coaching name updated!");
   }
 
-  // Admin PIN Reset Controls
   function openPinModal() {
     document.getElementById("inputCurrentPin").value = "";
     document.getElementById("inputNewPin").value = "";
@@ -427,83 +663,15 @@
   async function saveNewAdminPin() {
     const cur = document.getElementById("inputCurrentPin").value.trim();
     const next = document.getElementById("inputNewPin").value.trim();
-
-    if (cur !== currentAdminPin) {
-      return showToast("Current PIN is incorrect!");
-    }
-    if (!next || next.length < 4) {
-      return showToast("New PIN must be at least 4 digits!");
-    }
-
+    if (cur !== currentAdminPin) return showToast("Current PIN is incorrect!");
+    if (!next || next.length < 4) return showToast("New PIN must be at least 4 digits!");
     currentAdminPin = next;
     await db.collection("settings").doc("portalConfig").set({ adminPin: next }, { merge: true });
     closeModal("modalChangePin");
     showToast("Admin PIN reset successfully!");
   }
 
-  // Gate & Role Navigation
-  function showPortalGate() {
-    document.getElementById("gateSection").style.display = "block";
-    document.getElementById("adminSection").style.display = "none";
-    document.getElementById("parentSection").style.display = "none";
-    document.getElementById("adminPinBox").style.display = "none";
-    document.getElementById("parentLookupBox").style.display = "none";
-    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "none");
-  }
-
-  function renderAdminLoginForm() {
-    document.getElementById("adminPinBox").style.display = "block";
-    document.getElementById("parentLookupBox").style.display = "none";
-  }
-
-  function renderParentLoginForm() {
-    document.getElementById("parentLookupBox").style.display = "block";
-    document.getElementById("adminPinBox").style.display = "none";
-  }
-
-  function validateAdminPin() {
-    const entered = document.getElementById("adminPinInput").value.trim();
-    if (entered === currentAdminPin) {
-      document.getElementById("gateSection").style.display = "none";
-      document.getElementById("adminSection").style.display = "block";
-      document.querySelectorAll(".admin-only").forEach(el => el.style.display = "inline-flex");
-      showToast("✅ Admin access granted!");
-      loadBatches();
-      listenToStudents();
-    } else {
-      showToast("❌ Incorrect Admin PIN!");
-    }
-  }
-
-  function validateParentAccess() {
-    const roll = parseInt(document.getElementById("lookupRoll").value.trim(), 10);
-    const phone = document.getElementById("lookupPhone").value.replace(/\D/g, "").slice(-10);
-
-    if (isNaN(roll) || !phone) {
-      showToast("Please enter a valid Roll No and 10-digit phone!");
-      return;
-    }
-
-    db.collection("students")
-      .where("roll", "==", roll)
-      .where("phone", "==", phone)
-      .get()
-      .then(snapshot => {
-        if (snapshot.empty) {
-          showToast("❌ No student found with this Roll & Mobile combination!");
-          return;
-        }
-        snapshot.forEach(doc => {
-          currentParentStudent = { id: doc.id, ...doc.data() };
-        });
-        document.getElementById("gateSection").style.display = "none";
-        document.getElementById("parentSection").style.display = "block";
-        renderParentDashboard();
-      })
-      .catch(err => showToast("Error: " + err.message));
-  }
-
-  // Batches
+  // ================= BATCHES =================
   async function loadBatches() {
     try {
       const snap = await db.collection("batches").orderBy("name").get();
@@ -518,171 +686,760 @@
   }
 
   function populateBatchDropdowns() {
-    const selects = [document.getElementById("adminBatchFilter"), document.getElementById("newBatchSelect")];
-    selects.forEach(sel => {
-      if (!sel) return;
-      const cur = sel.value;
-      sel.innerHTML = activeBatches.map(b => `<option value="${b}">${b}</option>`).join("");
-      if (activeBatches.includes(cur)) sel.value = cur;
+    const ids = ["batchFilter", "newBatchSelect", "testBatchSelect"];
+    ids.forEach(id => {
+      const s = document.getElementById(id);
+      if (!s) return;
+      const c = s.value;
+      s.innerHTML = activeBatches.map(b => `<option value="${b}">${b}</option>`).join("");
+      if (activeBatches.includes(c)) s.value = c;
     });
   }
 
-  function openBatchModal() {
+  function openBatchManagementModal() {
     openModal("modalBatches");
-    renderBatchesListUI();
+    renderBatchItemsList();
   }
 
-  function renderBatchesListUI() {
-    const list = document.getElementById("batchesListUI");
+  function renderBatchItemsList() {
+    const list = document.getElementById("batchItemsList");
     list.innerHTML = activeBatches.map(b => `
-      <li style="display:flex; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--border); font-size:13px;">
-        <span>${b}</span>
-      </li>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-bottom:1px solid var(--border); font-size:13px;">
+        <span style="font-weight:700;">${b}</span>
+        <button class="btn btn-outline btn-sm" style="color:var(--absent); border-color:#fca5a5;" onclick="deleteBatch('${b}')">Delete</button>
+      </div>
     `).join("");
   }
 
-  async function addBatch() {
+  async function addNewBatch() {
     const name = document.getElementById("inputNewBatch").value.trim();
     if (!name) return;
-    await db.collection("batches").add({ name });
+    await db.collection("batches").add({ name, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     document.getElementById("inputNewBatch").value = "";
     activeBatches.push(name);
     populateBatchDropdowns();
-    renderBatchesListUI();
+    renderBatchItemsList();
     showToast(`Batch "${name}" created!`);
   }
 
-  // Student CRUD & Realtime
-  function listenToStudents() {
-    db.collection("students").onSnapshot(snap => {
-      allStudents = [];
-      snap.forEach(doc => allStudents.push({ id: doc.id, ...doc.data() }));
-      renderAdminStudents();
+  async function deleteBatch(bName) {
+    if (confirm(`Delete batch "${bName}"?`)) {
+      const snap = await db.collection("batches").where("name", "==", bName).get();
+      snap.forEach(d => d.ref.delete());
+      activeBatches = activeBatches.filter(b => b !== bName);
+      populateBatchDropdowns();
+      renderBatchItemsList();
+      showToast(`Batch removed.`);
+    }
+  }
+
+  // ================= ROLE GATE NAVIGATION =================
+  function showPortalGate() {
+    document.getElementById("gateSection").style.display = "block";
+    document.getElementById("adminSection").style.display = "none";
+    document.getElementById("parentSection").style.display = "none";
+    document.getElementById("adminPinBox").style.display = "none";
+    document.getElementById("parentLookupBox").style.display = "none";
+    document.querySelectorAll(".admin-only").forEach(e => e.style.display = "none");
+  }
+
+  function renderAdminLoginForm() {
+    document.getElementById("adminPinBox").style.display = "block";
+    document.getElementById("parentLookupBox").style.display = "none";
+  }
+
+  function renderParentLoginForm() {
+    document.getElementById("parentLookupBox").style.display = "block";
+    document.getElementById("adminPinBox").style.display = "none";
+  }
+
+  function validateAdminPin() {
+    const pin = document.getElementById("adminPinInput").value.trim();
+    if (pin === currentAdminPin) {
+      document.getElementById("gateSection").style.display = "none";
+      document.getElementById("adminSection").style.display = "block";
+      document.querySelectorAll(".admin-only").forEach(e => e.style.display = "inline-flex");
+      showToast("✅ Welcome Admin!");
+      loadBatches();
+      listenToHolidays();
+      listenToStudents();
+    } else {
+      showToast("❌ Incorrect Admin PIN!");
+    }
+  }
+
+  function validateParentAccess() {
+    const roll = parseInt(document.getElementById("lookupRoll").value.trim(), 10);
+    const phone = sanitizePhone(document.getElementById("lookupPhone").value);
+
+    if (isNaN(roll) || !phone) return showToast("Enter valid Roll and 10-digit Phone!");
+
+    db.collection("students").where("roll", "==", roll).where("phone", "==", phone).get().then(snap => {
+      if (snap.empty) return showToast("❌ Record not found! Verify Roll & Phone.");
+      snap.forEach(doc => { currentParentStudent = { id: doc.id, ...doc.data() }; });
+      document.getElementById("gateSection").style.display = "none";
+      document.getElementById("parentSection").style.display = "block";
+      renderParentDashboard();
     });
   }
 
-  function renderAdminStudents() {
-    const batch = document.getElementById("adminBatchFilter").value;
-    const list = allStudents.filter(s => s.batch === batch);
-    const tbody = document.getElementById("adminStudentTableBody");
+  // ================= HOLIDAYS SYSTEM =================
+  function listenToHolidays() {
+    db.collection("settings").doc("holidays").onSnapshot(doc => {
+      holidaysList = doc.exists ? (doc.data() || {}) : {};
+      updateHolidayBtnUI();
+      if (currentActiveTab === "attendance") renderAttendanceTable();
+    });
+  }
+
+  function updateHolidayBtnUI() {
+    const date = document.getElementById("attendanceDate").value;
+    const btn = document.getElementById("btnToggleHoliday");
+    if (holidaysList[date]) {
+      btn.textContent = "🏖️ Holiday Marked (Click to Unmark)";
+      btn.className = "btn btn-danger btn-sm";
+    } else {
+      btn.textContent = "🏖️ Mark as Holiday";
+      btn.className = "btn btn-holiday btn-sm";
+    }
+  }
+
+  async function toggleCurrentDateHoliday() {
+    const date = document.getElementById("attendanceDate").value;
+    const isHoliday = !holidaysList[date];
+    await db.collection("settings").doc("holidays").set({ [date]: isHoliday }, { merge: true });
+    showToast(isHoliday ? `Marked ${date} as Holiday!` : `Holiday cleared for ${date}`);
+  }
+
+  // ================= STUDENTS REALTIME =================
+  function listenToStudents() {
+    db.collection("students").onSnapshot(snap => {
+      const arr = [];
+      snap.forEach(doc => {
+        const d = doc.data();
+        arr.push({
+          id: doc.id,
+          roll: parseInt(d.roll, 10) || 0,
+          name: d.name || "",
+          batch: d.batch || (activeBatches[0] || "Class 10"),
+          feeAmount: Number(d.feeAmount) || 1000,
+          phone: sanitizePhone(d.phone),
+          altPhone: sanitizePhone(d.altPhone),
+          admissionDate: d.admissionDate || "2000-01-01",
+          dob: d.dob || "",
+          father: d.father || "",
+          address: d.address || ""
+        });
+      });
+      studentsList = arr.sort((a, b) => a.roll - b.roll);
+      renderActiveAdminView();
+    });
+  }
+
+  function getFilteredStudents() {
+    const b = document.getElementById("batchFilter").value;
+    const q = (document.getElementById("searchFilter").value || "").trim().toLowerCase();
+    return studentsList.filter(s => {
+      if (s.batch !== b) return false;
+      if (!q) return true;
+      return s.name.toLowerCase().includes(q) || String(s.roll).includes(q) || s.phone.includes(q);
+    });
+  }
+
+  // ================= ADMIN TABS =================
+  function switchAdminTab(tab) {
+    currentActiveTab = tab;
+    document.getElementById("navAttendance").classList.toggle("active", tab === "attendance");
+    document.getElementById("navFees").classList.toggle("active", tab === "fees");
+    document.getElementById("navTests").classList.toggle("active", tab === "tests");
+
+    document.getElementById("ctrlDateAttendance").style.display = tab === "attendance" ? "flex" : "none";
+    document.getElementById("ctrlHolidayBtn").style.display = tab === "attendance" ? "flex" : "none";
+    document.getElementById("ctrlMonthPicker").style.display = tab === "fees" ? "flex" : "none";
+    document.getElementById("ctrlTestSelector").style.display = tab === "tests" ? "flex" : "none";
+    document.getElementById("btnNewTest").style.display = tab === "tests" ? "inline-flex" : "none";
+
+    document.getElementById("statsAttendance").style.display = tab === "attendance" ? "grid" : "none";
+    document.getElementById("statsFees").style.display = tab === "fees" ? "grid" : "none";
+    document.getElementById("statsTests").style.display = tab === "tests" ? "grid" : "none";
+
+    if (tab === "attendance") loadDateAttendance();
+    else if (tab === "fees") loadFeeData();
+    else if (tab === "tests") loadBatchTests();
+  }
+
+  function handleBatchChange() {
+    if (currentActiveTab === "tests") loadBatchTests();
+    else renderActiveAdminView();
+  }
+
+  function renderActiveAdminView() {
+    if (currentActiveTab === "attendance") renderAttendanceTable();
+    else if (currentActiveTab === "fees") renderFeeTable();
+    else if (currentActiveTab === "tests") renderTestsTable();
+  }
+
+  // ================= ATTENDANCE TAB =================
+  function loadDateAttendance() {
+    const date = document.getElementById("attendanceDate").value;
+    updateHolidayBtnUI();
+    db.collection("attendance").doc(date).get().then(doc => {
+      currentDayAttendance = doc.exists ? (doc.data() || {}) : {};
+      renderAttendanceTable();
+    });
+  }
+
+  function renderAttendanceTable() {
+    document.getElementById("adminTableHeader").innerHTML = `
+      <tr>
+        <th style="width: 70px;">Roll</th>
+        <th>Student Name & Info</th>
+        <th>Attendance Status</th>
+        <th>WhatsApp Absent Alert</th>
+        <th style="text-align:right;">Actions</th>
+      </tr>
+    `;
+
+    const tbody = document.getElementById("adminTableBody");
     tbody.innerHTML = "";
 
-    let totalFees = 0, collected = 0;
+    const date = document.getElementById("attendanceDate").value;
+    const isDateHoliday = holidaysList[date];
+    const list = getFilteredStudents();
 
-    if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--muted);">No students enrolled in ${batch}.</td></tr>`;
-      document.getElementById("kpiTotalStudents").textContent = "0";
-      document.getElementById("kpiFeesPaid").textContent = "₹0";
-      document.getElementById("kpiFeesPending").textContent = "₹0";
+    if (isDateHoliday) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:32px; background:var(--holiday-subtle); color:var(--holiday); font-weight:800;">🏖️ OFFICIAL COACHING HOLIDAY / OFF</td></tr>`;
+      updateAttendanceKPIs(0, 0, 0);
       return;
     }
 
-    list.forEach(student => {
-      const fee = Number(student.feeAmount) || 1000;
-      totalFees += fee;
-      const isPaid = student.feeStatus === "PAID";
-      if (isPaid) collected += fee;
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted);">No students in this batch.</td></tr>`;
+      updateAttendanceKPIs(0, 0, 0);
+      return;
+    }
 
+    let p = 0, a = 0, enrolledCount = 0;
+
+    list.forEach(s => {
+      const isEnrolled = date >= s.admissionDate;
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><strong>#${student.roll}</strong></td>
-        <td>
-          <div style="font-weight:700;">${student.name}</div>
-          <div style="font-size:11px; color:var(--muted);">📞 ${student.phone} ${student.dob ? `| 🎂 ${student.dob}` : ''}</div>
-        </td>
-        <td>₹${fee.toLocaleString()}</td>
-        <td>
-          <button class="btn ${isPaid ? 'btn-success' : 'btn-outline'}" style="padding:4px 8px; font-size:11px;" onclick="toggleStudentFee('${student.id}', '${isPaid ? 'PENDING' : 'PAID'}')">
-            ${isPaid ? '✅ Paid' : '⏳ Due'}
-          </button>
-        </td>
-        <td>
-          <button class="btn btn-outline" style="padding:4px 8px; font-size:11px;" onclick="quickMarkAttendance('${student.name}')">P / A</button>
-        </td>
-        <td>
-          <button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteStudent('${student.id}')">Delete</button>
-        </td>
-      `;
+
+      if (!isEnrolled) {
+        tr.innerHTML = `
+          <td><strong>#${s.roll}</strong></td>
+          <td>
+            <div style="font-weight:700;">${s.name}</div>
+            <div style="font-size:11px; color:var(--text-muted);">Adm Date: ${s.admissionDate}</div>
+          </td>
+          <td><span class="badge-na">Not Enrolled Yet</span></td>
+          <td><span style="color:#cbd5e1; font-size:11px;">—</span></td>
+          <td style="text-align:right;">
+            <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">🗑️</button>
+          </td>
+        `;
+      } else {
+        enrolledCount++;
+        const status = currentDayAttendance[s.id] || "Present";
+        if (status === "Present") p++;
+        else if (status === "Absent") a++;
+
+        const waAbsentMsg = encodeURIComponent(
+          `Namaste ji,\n` +
+          `Aapka bachha *${s.name}* (Roll #${s.roll}, ${s.batch}) aaj tareekh ${date} ko coaching se ANUPASTHIT (Absent) tha.\n\n` +
+          `Kripya dhyan dein.\n` +
+          `— *${coachingInstituteName}*`
+        );
+        const waUrl = `https://wa.me/91${s.phone}?text=${waAbsentMsg}`;
+
+        tr.innerHTML = `
+          <td><strong>#${s.roll}</strong></td>
+          <td>
+            <div style="font-weight:700;">${s.name}</div>
+            <div style="font-size:11px; color:var(--text-muted);">Adm: ${s.admissionDate} | 📞 ${s.phone}</div>
+          </td>
+          <td>
+            <div class="btn-group-status">
+              <button class="pill-btn ${status === 'Present' ? 'active-p' : ''}" onclick="setAttendance('${s.id}', 'Present')">P</button>
+              <button class="pill-btn ${status === 'Late' ? 'active-l' : ''}" onclick="setAttendance('${s.id}', 'Late')">L</button>
+              <button class="pill-btn ${status === 'Absent' ? 'active-a' : ''}" onclick="setAttendance('${s.id}', 'Absent')">A</button>
+            </div>
+          </td>
+          <td>
+            ${status === 'Absent' ? `<a href="${waUrl}" target="_blank" class="wa-link">💬 Send Alert</a>` : `<span style="color:var(--present); font-size:12px; font-weight:700;">✓ Present</span>`}
+          </td>
+          <td style="text-align:right;">
+            <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">🗑️</button>
+          </td>
+        `;
+      }
       tbody.appendChild(tr);
     });
 
-    document.getElementById("kpiTotalStudents").textContent = list.length;
-    document.getElementById("kpiFeesPaid").textContent = "₹" + collected.toLocaleString();
-    document.getElementById("kpiFeesPending").textContent = "₹" + (totalFees - collected).toLocaleString();
+    updateAttendanceKPIs(enrolledCount, p, a);
   }
 
-  function openAddStudentModal() {
-    document.getElementById("newRoll").value = "";
-    document.getElementById("newName").value = "";
-    document.getElementById("newPhone").value = "";
-    document.getElementById("newDob").value = "";
-    openModal("modalAddStudent");
+  function setAttendance(sId, status) {
+    const date = document.getElementById("attendanceDate").value;
+    currentDayAttendance[sId] = status;
+    renderAttendanceTable();
+    db.collection("attendance").doc(date).set({ [sId]: status }, { merge: true });
   }
 
-  async function saveNewStudent() {
-    const roll = parseInt(document.getElementById("newRoll").value, 10);
-    const name = document.getElementById("newName").value.trim();
-    const batch = document.getElementById("newBatchSelect").value;
-    const feeAmount = Number(document.getElementById("newFee").value) || 1000;
-    const phone = document.getElementById("newPhone").value.replace(/\D/g, "").slice(-10);
-    const dob = document.getElementById("newDob").value;
+  function updateAttendanceKPIs(total, p, a) {
+    document.getElementById("kpiActiveStudents").textContent = total;
+    document.getElementById("kpiPresentCount").textContent = p;
+    document.getElementById("kpiAbsentCount").textContent = a;
+    document.getElementById("kpiAttendanceRate").textContent = total > 0 ? Math.round((p / total) * 100) + "%" : "0%";
+  }
 
-    if (isNaN(roll) || !name || !phone) {
-      showToast("Please enter Roll, Name and 10-digit Phone!");
+  // ================= FEES TAB =================
+  function loadFeeData() {
+    const m = document.getElementById("selectedMonth").value;
+    db.collection("fees").doc(m).get().then(doc => {
+      currentMonthFeeRecords = doc.exists ? (doc.data() || {}) : {};
+      renderFeeTable();
+    });
+  }
+
+  function renderFeeTable() {
+    document.getElementById("adminTableHeader").innerHTML = `
+      <tr>
+        <th style="width: 70px;">Roll</th>
+        <th>Student Name & Info</th>
+        <th>Fee Amount</th>
+        <th>Payment Status</th>
+        <th>1-Click WhatsApp Action</th>
+        <th style="text-align:right;">Delete</th>
+      </tr>
+    `;
+
+    const tbody = document.getElementById("adminTableBody");
+    tbody.innerHTML = "";
+
+    const m = document.getElementById("selectedMonth").value;
+    const list = getFilteredStudents();
+
+    let totalDue = 0, collected = 0, paid = 0, enrolled = 0;
+
+    list.forEach(s => {
+      const admMonth = s.admissionDate.substring(0, 7);
+      const isEnrolled = m >= admMonth;
+      const tr = document.createElement("tr");
+
+      if (!isEnrolled) {
+        tr.innerHTML = `
+          <td><strong>#${s.roll}</strong></td>
+          <td><div style="font-weight:700;">${s.name}</div><div style="font-size:11px; color:var(--text-muted);">Adm: ${s.admissionDate}</div></td>
+          <td><span style="color:var(--text-muted);">—</span></td>
+          <td><span class="badge-na">Not Enrolled in ${m}</span></td>
+          <td><span style="color:#cbd5e1; font-size:11px;">No Dues</span></td>
+          <td style="text-align:right;"><button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">🗑️</button></td>
+        `;
+      } else {
+        enrolled++;
+        const fee = s.feeAmount || 1000;
+        totalDue += fee;
+        const isPaid = currentMonthFeeRecords[s.id]?.status === "PAID";
+        if (isPaid) { collected += fee; paid++; }
+
+        const waDueMsg = encodeURIComponent(
+          `Namaste ji,\n` +
+          `*${s.name}* (Roll #${s.roll}, ${s.batch}) ki coaching tuition fee mahine (*${m}*) ki *₹${fee.toLocaleString('en-IN')}* abhi pending hai.\n\n` +
+          `Kripya samay par jama karwayein. Dhanyawaad!\n` +
+          `— *${coachingInstituteName}*`
+        );
+        const waDueUrl = `https://wa.me/91${s.phone}?text=${waDueMsg}`;
+
+        tr.innerHTML = `
+          <td><strong>#${s.roll}</strong></td>
+          <td><div style="font-weight:700;">${s.name}</div><div style="font-size:11px; color:var(--text-muted);">📞 ${s.phone}</div></td>
+          <td><strong>₹${fee.toLocaleString('en-IN')}</strong></td>
+          <td>
+            <button class="btn ${isPaid ? 'tag-paid' : 'tag-due'}" style="padding:4px 8px; font-size:11px;" onclick="toggleStudentFee('${s.id}', '${isPaid ? 'PENDING' : 'PAID'}')">
+              ${isPaid ? '✅ Paid' : '⏳ Due'}
+            </button>
+          </td>
+          <td>
+            ${isPaid 
+              ? `<button class="btn btn-outline btn-sm" onclick="openFeeReceipt('${s.id}')">🧾 Receipt & WhatsApp</button>` 
+              : `<a href="${waDueUrl}" target="_blank" class="wa-link wa-link-due">💬 Due Reminder</a>`}
+          </td>
+          <td style="text-align:right;"><button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">🗑️</button></td>
+        `;
+      }
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("kpiFeeEligible").textContent = enrolled;
+    document.getElementById("kpiFeeCollected").textContent = "₹" + collected.toLocaleString('en-IN');
+    document.getElementById("kpiFeePending").textContent = "₹" + (totalDue - collected).toLocaleString('en-IN');
+    document.getElementById("kpiFeeRatio").textContent = `${paid} / ${enrolled}`;
+  }
+
+  async function toggleStudentFee(sId, status) {
+    const m = document.getElementById("selectedMonth").value;
+    const record = { status, date: new Date().toLocaleDateString('en-GB'), timestamp: Date.now() };
+    currentMonthFeeRecords[sId] = record;
+    renderFeeTable();
+    await db.collection("fees").doc(m).set({ [sId]: record }, { merge: true });
+    showToast(`Fee status updated to ${status}`);
+  }
+
+  function openFeeReceipt(sId) {
+    const s = studentsList.find(x => x.id === sId);
+    if (!s) return;
+    const m = document.getElementById("selectedMonth").value;
+    const rec = currentMonthFeeRecords[sId] || {};
+    const recNum = "REC-" + (rec.timestamp ? String(rec.timestamp).slice(-6) : "892110");
+    const payDate = rec.date || new Date().toLocaleDateString('en-GB');
+
+    document.getElementById("slipReceiptId").textContent = "#" + recNum;
+    document.getElementById("slipPayDate").textContent = payDate;
+    document.getElementById("slipStudentName").textContent = s.name;
+    document.getElementById("slipRollClass").textContent = `#${s.roll} (${s.batch})`;
+    document.getElementById("slipFeeMonth").textContent = m;
+    document.getElementById("slipAmountPaid").textContent = "₹" + (s.feeAmount || 1000).toLocaleString('en-IN');
+
+    const msg = encodeURIComponent(
+      `*🧾 OFFICIAL FEE RECEIPT*\n` +
+      `*${coachingInstituteName.toUpperCase()}*\n` +
+      `Receipt No: *#${recNum}*\n` +
+      `Student: *${s.name}* (Roll: #${s.roll}, ${s.batch})\n` +
+      `Month: *${m}*\n` +
+      `Amount Received: *₹${(s.feeAmount || 1000).toLocaleString('en-IN')}*\n` +
+      `Payment Date: ${payDate}\n` +
+      `Status: CONFIRMED & VERIFIED ✅\n` +
+      `— *${coachingInstituteName}*`
+    );
+    document.getElementById("slipWhatsappBtn").href = `https://wa.me/91${s.phone}?text=${msg}`;
+    openModal("modalFeeReceipt");
+  }
+
+  // ================= TESTS TAB =================
+  function loadBatchTests() {
+    const b = document.getElementById("batchFilter").value;
+    const s = document.getElementById("activeTestSelect");
+    s.innerHTML = `<option value="">Loading tests...</option>`;
+
+    db.collection("tests").where("batch", "==", b).get().then(snap => {
+      availableTestsList = [];
+      snap.forEach(d => availableTestsList.push({ id: d.id, ...d.data() }));
+      availableTestsList.sort((x, y) => (y.date || "").localeCompare(x.date || ""));
+
+      s.innerHTML = "";
+      if (availableTestsList.length === 0) {
+        s.innerHTML = `<option value="">No tests created</option>`;
+        currentActiveTest = null;
+        renderTestsTable();
+        return;
+      }
+      availableTestsList.forEach(t => {
+        const o = document.createElement("option");
+        o.value = t.id;
+        o.textContent = `${t.date} | ${t.subject} - ${t.topic} (Max: ${t.maxMarks})`;
+        s.appendChild(o);
+      });
+      currentActiveTest = availableTestsList[0];
+      s.value = currentActiveTest.id;
+      renderTestsTable();
+    });
+  }
+
+  function handleActiveTestChange() {
+    const id = document.getElementById("activeTestSelect").value;
+    currentActiveTest = availableTestsList.find(t => t.id === id) || null;
+    renderTestsTable();
+  }
+
+  function openCreateTestModal() {
+    document.getElementById("testBatchSelect").value = document.getElementById("batchFilter").value;
+    document.getElementById("testSubject").value = "";
+    document.getElementById("testTopic").value = "";
+    document.getElementById("testMaxMarks").value = "25";
+    openModal("modalCreateTest");
+  }
+
+  async function submitCreateTest() {
+    const batch = document.getElementById("testBatchSelect").value;
+    const subject = document.getElementById("testSubject").value.trim();
+    const topic = document.getElementById("testTopic").value.trim();
+    const maxMarks = Number(document.getElementById("testMaxMarks").value);
+    const date = document.getElementById("testDate").value || todayDateStr;
+
+    if (!subject || !topic || maxMarks <= 0) return showToast("Enter subject, topic and marks!");
+
+    await db.collection("tests").add({
+      batch, subject, topic, maxMarks, date, scores: {},
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal("modalCreateTest");
+    document.getElementById("batchFilter").value = batch;
+    showToast("Test created!");
+    loadBatchTests();
+  }
+
+  function renderTestsTable() {
+    document.getElementById("adminTableHeader").innerHTML = `
+      <tr>
+        <th style="width: 70px;">Roll</th>
+        <th>Student Name & Info</th>
+        <th style="width: 130px;">Marks Scored</th>
+        <th>Performance</th>
+        <th>Scorecard Action</th>
+        <th style="text-align:right;">Delete</th>
+      </tr>
+    `;
+
+    const tbody = document.getElementById("adminTableBody");
+    tbody.innerHTML = "";
+
+    if (!currentActiveTest) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:28px; color:var(--text-muted);">No tests created for this batch yet.</td></tr>`;
+      updateTestKPIs(0, 0, 0, 0);
       return;
     }
 
-    await db.collection("students").add({
-      roll, name, batch, feeAmount, phone, dob,
-      feeStatus: "PAID",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    const list = getFilteredStudents();
+    const maxMarks = Number(currentActiveTest.maxMarks) || 25;
+    const scores = currentActiveTest.scores || {};
+
+    let totalAppeared = 0, sumMarks = 0, highest = 0, pass = 0;
+
+    list.forEach(s => {
+      const isEnrolled = currentActiveTest.date >= s.admissionDate;
+      const tr = document.createElement("tr");
+
+      if (!isEnrolled) {
+        tr.innerHTML = `
+          <td><strong>#${s.roll}</strong></td>
+          <td><div style="font-weight:700;">${s.name}</div><div style="font-size:11px; color:var(--text-muted);">Admitted: ${s.admissionDate}</div></td>
+          <td colspan="3"><span class="badge-na">Admitted After Test Date</span></td>
+          <td style="text-align:right;"><button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">🗑️</button></td>
+        `;
+      } else {
+        const rawScore = scores[s.id];
+        const isAbsent = rawScore === "ABSENT";
+        const hasScore = rawScore !== undefined && !isAbsent;
+        const marks = hasScore ? Number(rawScore) : "";
+
+        let pct = 0, remark = "Pending", bClass = "badge-na";
+        if (isAbsent) {
+          remark = "Absent for Test";
+          bClass = "badge-absent-test";
+        } else if (hasScore) {
+          totalAppeared++;
+          sumMarks += marks;
+          if (marks > highest) highest = marks;
+          pct = Math.round((marks / maxMarks) * 100);
+          if (pct >= 40) { pass++; remark = `Passed (${pct}%)`; bClass = "badge-pass"; }
+          else { remark = `Needs Work (${pct}%)`; bClass = "badge-fail"; }
+        }
+
+        const waScoreMsg = encodeURIComponent(
+          `*📊 OFFICIAL TEST SCORECARD*\n` +
+          `*${coachingInstituteName.toUpperCase()}*\n` +
+          `Student: *${s.name}* (Roll: #${s.roll}, ${s.batch})\n` +
+          `Subject: *${currentActiveTest.subject}*\n` +
+          `Topic: *${currentActiveTest.topic}*\n` +
+          `Result: ${isAbsent ? 'ABSENT ❌' : `*${marks} / ${maxMarks}* (${pct}%)`}\n` +
+          `Remark: *${remark}*\n` +
+          `— *${coachingInstituteName}*`
+        );
+        const waUrl = `https://wa.me/91${s.phone}?text=${waScoreMsg}`;
+
+        tr.innerHTML = `
+          <td><strong>#${s.roll}</strong></td>
+          <td><div style="font-weight:700;">${s.name}</div><div style="font-size:11px; color:var(--text-muted);">📞 ${s.phone}</div></td>
+          <td>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <input type="number" min="0" max="${maxMarks}" value="${hasScore ? marks : ''}" placeholder="Score" style="width:75px; padding:4px 8px; font-weight:700;" ${isAbsent ? 'disabled' : ''} onchange="saveStudentScore('${s.id}', this.value)">
+              <button class="btn btn-outline btn-sm ${isAbsent ? 'btn-danger' : ''}" onclick="toggleTestAbsent('${s.id}')">${isAbsent ? 'AB' : 'A?'}</button>
+            </div>
+          </td>
+          <td><span class="badge-score ${bClass}">${remark}</span></td>
+          <td>
+            ${(hasScore || isAbsent) 
+              ? `<div style="display:flex; gap:4px;"><a href="${waUrl}" target="_blank" class="wa-link">📲 WhatsApp</a><button class="btn btn-outline btn-sm" onclick="openScorecardModal('${s.id}')">🖨️ Slip</button></div>` 
+              : `<span style="color:#cbd5e1; font-size:11px;">Enter score</span>`}
+          </td>
+          <td style="text-align:right;"><button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">🗑️</button></td>
+        `;
+      }
+      tbody.appendChild(tr);
     });
 
-    closeModal("modalAddStudent");
-    showToast("Student added successfully!");
+    const avg = totalAppeared > 0 ? Math.round(((sumMarks / totalAppeared) / maxMarks) * 100) : 0;
+    const passR = totalAppeared > 0 ? Math.round((pass / totalAppeared) * 100) : 0;
+    updateTestKPIs(maxMarks, avg, highest, passR);
   }
 
-  async function toggleStudentFee(id, newStatus) {
-    await db.collection("students").doc(id).update({ feeStatus: newStatus });
-    showToast("Fee status updated!");
+  function updateTestKPIs(max, avg, high, passRate) {
+    document.getElementById("kpiTestMax").textContent = max || "--";
+    document.getElementById("kpiTestAvg").textContent = avg + "%";
+    document.getElementById("kpiTestHighest").textContent = high;
+    document.getElementById("kpiTestPassRate").textContent = passRate + "%";
+  }
+
+  async function saveStudentScore(sId, val) {
+    if (!currentActiveTest) return;
+    const max = Number(currentActiveTest.maxMarks) || 25;
+    if (val.trim() === "") delete currentActiveTest.scores[sId];
+    else {
+      const n = Number(val);
+      if (isNaN(n) || n < 0 || n > max) return showToast(`Marks must be between 0 and ${max}!`);
+      currentActiveTest.scores[sId] = n;
+    }
+    renderTestsTable();
+    await db.collection("tests").doc(currentActiveTest.id).set({ scores: currentActiveTest.scores }, { merge: true });
+  }
+
+  async function toggleTestAbsent(sId) {
+    if (!currentActiveTest) return;
+    if (currentActiveTest.scores[sId] === "ABSENT") delete currentActiveTest.scores[sId];
+    else currentActiveTest.scores[sId] = "ABSENT";
+    renderTestsTable();
+    await db.collection("tests").doc(currentActiveTest.id).set({ scores: currentActiveTest.scores }, { merge: true });
+  }
+
+  function openScorecardModal(sId) {
+    const s = studentsList.find(x => x.id === sId);
+    if (!s || !currentActiveTest) return;
+    const max = Number(currentActiveTest.maxMarks) || 25;
+    const sc = currentActiveTest.scores[sId];
+    const isAbs = sc === "ABSENT";
+    const marks = isAbs ? 0 : Number(sc) || 0;
+    const pct = isAbs ? 0 : Math.round((marks / max) * 100);
+
+    document.getElementById("scStudentName").textContent = s.name;
+    document.getElementById("scRollBatch").textContent = `#${s.roll} (${s.batch})`;
+    document.getElementById("scSubject").textContent = currentActiveTest.subject;
+    document.getElementById("scTopic").textContent = currentActiveTest.topic;
+    document.getElementById("scExamDate").textContent = currentActiveTest.date;
+    document.getElementById("scMarksScored").textContent = isAbs ? "ABSENT" : `${marks} / ${max}`;
+    document.getElementById("scPercentage").textContent = isAbs ? "0%" : `${pct}%`;
+    document.getElementById("scGradeRemark").textContent = isAbs ? "ABSENT" : (pct >= 40 ? "Passed" : "Needs Improvement");
+
+    const msg = encodeURIComponent(
+      `*📊 OFFICIAL TEST SCORECARD*\n` +
+      `*${coachingInstituteName.toUpperCase()}*\n` +
+      `Student: *${s.name}* (Roll #${s.roll})\n` +
+      `Subject: *${currentActiveTest.subject}*\n` +
+      `Topic: *${currentActiveTest.topic}*\n` +
+      `Marks: ${isAbs ? 'ABSENT ❌' : `*${marks} / ${max}* (${pct}%)`}\n` +
+      `— *${coachingInstituteName}*`
+    );
+    document.getElementById("scWhatsappBtn").href = `https://wa.me/91${s.phone}?text=${msg}`;
+    openModal("modalScorecard");
+  }
+
+  // ================= STUDENT CRUD =================
+  function openAddStudentModal() {
+    document.getElementById("newRoll").value = "";
+    document.getElementById("newName").value = "";
+    document.getElementById("newAdmissionDate").value = todayDateStr;
+    document.getElementById("newDob").value = "";
+    document.getElementById("newPhone").value = "";
+    document.getElementById("newFee").value = "1000";
+    openModal("modalAddStudent");
+  }
+
+  async function submitAddStudent() {
+    const roll = parseInt(document.getElementById("newRoll").value, 10);
+    const name = document.getElementById("newName").value.trim();
+    const batch = document.getElementById("newBatchSelect").value;
+    const admissionDate = document.getElementById("newAdmissionDate").value || todayDateStr;
+    const dob = document.getElementById("newDob").value || "";
+    const feeAmount = Number(document.getElementById("newFee").value) || 1000;
+    const phone = sanitizePhone(document.getElementById("newPhone").value);
+
+    if (isNaN(roll) || !name || !phone) return showToast("Valid Roll, Name & Phone are required!");
+
+    await db.collection("students").add({
+      roll, name, batch, admissionDate, dob, feeAmount, phone,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    closeModal("modalAddStudent");
+    showToast("Student profile enrolled!");
   }
 
   async function deleteStudent(id) {
-    if (confirm("Permanently delete this student?")) {
+    if (confirm("Delete this student permanently?")) {
       await db.collection("students").doc(id).delete();
       showToast("Student deleted.");
     }
   }
 
-  function quickMarkAttendance(name) {
-    showToast(`Attendance verified for ${name}`);
-  }
-
-  // Parent Dashboard
-  function renderParentDashboard() {
+  // ================= PARENT DASHBOARD & TESTS SYNC =================
+  async function renderParentDashboard() {
     if (!currentParentStudent) return;
     const s = currentParentStudent;
+
     document.getElementById("pViewName").textContent = s.name;
     document.getElementById("pViewClassRoll").textContent = `${s.batch} | Roll #${s.roll}`;
-    document.getElementById("pViewFeeAmount").textContent = "₹" + (s.feeAmount || 1000).toLocaleString();
-    
-    const feeStatusEl = document.getElementById("pViewFeeStatus");
-    if (s.feeStatus === "PAID") {
-      feeStatusEl.textContent = "VERIFIED & PAID ✅";
-      feeStatusEl.style.color = "var(--success)";
-    } else {
-      feeStatusEl.textContent = "PAYMENT DUE ⏳";
-      feeStatusEl.style.color = "var(--danger)";
-    }
-
-    document.getElementById("pViewFather").textContent = s.father || "Not updated";
+    document.getElementById("pViewAdmDate").textContent = s.admissionDate || "Not recorded";
     document.getElementById("pViewDob").textContent = s.dob || "Not updated";
+    document.getElementById("pViewFather").textContent = s.father || "Not updated";
     document.getElementById("pViewPhone").textContent = s.phone || "--";
     document.getElementById("pViewAltPhone").textContent = s.altPhone || "None";
     document.getElementById("pViewAddress").textContent = s.address || "Not updated";
+    document.getElementById("pViewFeeAmount").textContent = "₹" + (s.feeAmount || 1000).toLocaleString('en-IN');
+
+    // Live Fee Status Check
+    const feeDoc = await db.collection("fees").doc(thisMonthStr).get();
+    const feeRecord = feeDoc.exists ? (feeDoc.data()[s.id] || {}) : {};
+    const isPaid = feeRecord.status === "PAID";
+    const statusEl = document.getElementById("pViewFeeStatus");
+    if (isPaid) {
+      statusEl.textContent = "VERIFIED & PAID ✅";
+      statusEl.style.color = "var(--present)";
+    } else {
+      statusEl.textContent = "PAYMENT DUE ⏳";
+      statusEl.style.color = "var(--absent)";
+    }
 
     const msg = encodeURIComponent(`Namaste Sir, I am contacting you regarding my child ${s.name} (Roll #${s.roll}, ${s.batch}).`);
-    document.getElementById("pTeacherWhatsapp").href = `https://wa.me/919876543210?text=${msg}`;
+    document.getElementById("pTeacherWhatsappBtn").href = `https://wa.me/919876543210?text=${msg}`;
+
+    // Load Tests strictly after admission date
+    const testContainer = document.getElementById("pViewTestContainer");
+    testContainer.innerHTML = `<p style="font-size:12px; color:var(--text-muted); padding:10px;">Loading evaluations...</p>`;
+
+    const testsSnap = await db.collection("tests").where("batch", "==", s.batch).get();
+    if (testsSnap.empty) {
+      testContainer.innerHTML = `<p style="font-size:12px; color:var(--text-muted); padding:10px;">No tests conducted for this batch yet.</p>`;
+      return;
+    }
+
+    const testCards = [];
+    testsSnap.forEach(d => {
+      const t = d.data();
+      // Ignore tests before student's admission date
+      if (t.date >= s.admissionDate) {
+        const sc = t.scores ? t.scores[s.id] : undefined;
+        const isAbs = sc === "ABSENT";
+        const hasScore = sc !== undefined && !isAbs;
+        const marks = hasScore ? Number(sc) : "--";
+        const max = t.maxMarks || 25;
+        const pct = hasScore ? Math.round((marks / max) * 100) : 0;
+
+        testCards.push(`
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:8px 0; font-size:12px;">
+            <div>
+              <div style="font-weight:700; color:#1e1b4b;">${t.subject}: ${t.topic}</div>
+              <div style="color:var(--text-muted); font-size:11px;">Exam Date: ${t.date}</div>
+            </div>
+            <div style="text-align:right;">
+              <span class="badge-score ${isAbs ? 'badge-absent-test' : (hasScore ? (pct >= 40 ? 'badge-pass' : 'badge-fail') : 'badge-na')}">
+                ${isAbs ? 'ABSENT' : (hasScore ? `${marks} / ${max} (${pct}%)` : 'Not Evaluated')}
+              </span>
+            </div>
+          </div>
+        `);
+      }
+    });
+
+    testContainer.innerHTML = testCards.length > 0 ? testCards.join("") : `<p style="font-size:12px; color:var(--text-muted); padding:10px;">No tests after your admission date.</p>`;
   }
 
   function openParentEditModal() {
@@ -696,19 +1453,18 @@
 
   async function submitParentUpdate() {
     if (!currentParentStudent) return;
-    const updatePayload = {
+    const payload = {
       dob: document.getElementById("editParentDob").value,
       father: document.getElementById("editParentFather").value.trim(),
-      altPhone: document.getElementById("editParentAltPhone").value.replace(/\D/g, "").slice(-10),
+      altPhone: sanitizePhone(document.getElementById("editParentAltPhone").value),
       address: document.getElementById("editParentAddress").value.trim(),
       lastUpdatedByParent: firebase.firestore.FieldValue.serverTimestamp()
     };
-
-    await db.collection("students").doc(currentParentStudent.id).update(updatePayload);
-    currentParentStudent = { ...currentParentStudent, ...updatePayload };
+    await db.collection("students").doc(currentParentStudent.id).update(payload);
+    currentParentStudent = { ...currentParentStudent, ...payload };
     closeModal("modalParentEdit");
     renderParentDashboard();
-    showToast("✅ Details successfully updated!");
+    showToast("✅ Profile updated successfully!");
   }
 </script>
 </body>
