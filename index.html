@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coaching Management Suite - Admin & Parent Portal</title>
+  <title>Coaching Suite - Advanced Admin & Parent Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; line-height: 1.45; }
-    .container { max-width: 1140px; margin: 0 auto; }
+    .container { max-width: 1160px; margin: 0 auto; }
 
     /* Top Bar */
     .top-bar {
@@ -63,6 +63,14 @@
     .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
     .btn-holiday { background: var(--holiday-subtle); color: var(--holiday); border-color: #ddd6fe; }
     .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+
+    /* Birthday Alert */
+    .bday-container { margin-bottom: 16px; display: none; flex-direction: column; gap: 8px; }
+    .bday-card {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 1px solid #fde68a; padding: 12px 18px; border-radius: var(--radius);
+      display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm);
+    }
 
     /* Auth Gate Card */
     .auth-card {
@@ -100,12 +108,12 @@
 
     /* Tables */
     .table-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    table { width: 100%; border-collapse: collapse; min-width: 780px; }
     th { background: #f8fafc; padding: 12px 14px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: left; }
     td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:hover td { background-color: #fafbfc; }
 
-    /* Pills & Status Badges */
+    /* Pills & Status */
     .btn-group-status { display: inline-flex; gap: 4px; }
     .pill-btn {
       padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;
@@ -139,7 +147,7 @@
     .form-group label { font-size: 12px; font-weight: 700; color: #334155; }
     .form-group small { font-size: 11px; color: var(--text-muted); }
 
-    /* Slips & Printable Sheets */
+    /* Slips */
     .slip-card { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; background: #fafafa; margin: 14px 0; }
     .slip-header { text-align: center; margin-bottom: 14px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
     .slip-header h2 { font-size: 17px; font-weight: 800; color: #1e1b4b; text-transform: uppercase; }
@@ -155,14 +163,14 @@
     }
   </style>
 
-  <!-- Firebase v9 Compat SDKs -->
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <div class="container">
-  <!-- Top Bar -->
+  <!-- Top Navigation Bar -->
   <div class="top-bar">
     <div class="brand">
       <span>📖</span>
@@ -177,7 +185,10 @@
     </div>
   </div>
 
-  <!-- GATE / ROLE SELECTOR SCREEN -->
+  <!-- Birthday Alert Banner -->
+  <div id="birthdayAlertBox" class="bday-container"></div>
+
+  <!-- GATE / LOGIN SCREEN -->
   <div id="gateSection">
     <div class="auth-card">
       <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Select Portal Access</h2>
@@ -219,16 +230,17 @@
       <button class="tab-btn active" id="navAttendance" onclick="switchAdminTab('attendance')">📋 Attendance</button>
       <button class="tab-btn" id="navFees" onclick="switchAdminTab('fees')">💰 Fee Tracker</button>
       <button class="tab-btn" id="navTests" onclick="switchAdminTab('tests')">📝 Tests & Results</button>
+      <button class="tab-btn" id="navAnalytics" onclick="switchAdminTab('analytics')">📊 Performance Analytics</button>
     </nav>
 
     <!-- Toolbar Controls -->
-    <div class="controls-panel">
+    <div class="controls-panel" id="adminControlsPanel">
       <div class="filter-box">
         <label for="batchFilter">Batch / Class</label>
         <select id="batchFilter" onchange="handleBatchChange()"></select>
       </div>
 
-      <div class="filter-box">
+      <div class="filter-box" id="ctrlSearchFilter">
         <label for="searchFilter">🔍 Search</label>
         <input type="text" id="searchFilter" placeholder="Name or roll..." oninput="renderActiveAdminView()">
       </div>
@@ -238,8 +250,8 @@
         <input type="date" id="attendanceDate" onchange="loadDateAttendance()">
       </div>
 
-      <div class="filter-box" id="ctrlHolidayBtn" style="display: flex; flex-direction: row; gap: 6px;">
-        <button class="btn btn-holiday btn-sm" id="btnToggleHoliday" style="flex: 1;" onclick="toggleCurrentDateHoliday()">🏖️ Mark Holiday</button>
+      <div class="filter-box" id="ctrlHolidayBtn">
+        <button class="btn btn-holiday btn-sm" id="btnToggleHoliday" style="width: 100%;" onclick="openHolidayModal()">🏖️ Manage Holidays</button>
       </div>
 
       <div class="filter-box" id="ctrlMonthPicker" style="display: none;">
@@ -283,40 +295,112 @@
     </div>
 
     <!-- Main Table Container -->
-    <div class="table-box">
+    <div class="table-box" id="adminTableContainer">
       <table>
         <thead id="adminTableHeader"></thead>
         <tbody id="adminTableBody"></tbody>
       </table>
     </div>
+
+    <!-- Performance Analytics Section (Roll Number Search) -->
+    <div id="analyticsContainer" style="display: none;">
+      <div style="background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: var(--radius); margin-bottom: 18px;">
+        <h3 style="font-size: 16px; font-weight: 800; color: #1e1b4b; margin-bottom: 12px;">🔍 Search Student Performance by Roll Number</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+          <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">SELECT BATCH</label>
+            <select id="analyticsBatchSelect" style="margin-top: 4px;"></select>
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">STUDENT ROLL NO</label>
+            <input type="number" id="analyticsRollInput" placeholder="e.g. 1" style="margin-top: 4px;">
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">FROM DATE</label>
+            <input type="date" id="analyticsStartDate" style="margin-top: 4px;">
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">TO DATE</label>
+            <input type="date" id="analyticsEndDate" style="margin-top: 4px;">
+          </div>
+          <button class="btn btn-primary" onclick="generateStudentAnalytics()">Search Profile</button>
+        </div>
+      </div>
+
+      <div id="analyticsReportCard" style="display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 14px; margin-bottom: 16px;">
+          <div>
+            <h2 id="anName" style="font-size: 20px; font-weight: 800; color: #1e1b4b;">Student Name</h2>
+            <p id="anMeta" style="font-size: 13px; color: var(--text-muted);">Class -- | Roll #--</p>
+          </div>
+          <div id="anOverallRateBadge" style="font-size: 18px; font-weight: 800; color: var(--primary); background: var(--primary-subtle); padding: 6px 14px; border-radius: 999px;">0% Attendance</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-caption">Total Eligible Classes</div><div class="stat-number" id="anTotalClasses">0</div></div>
+          <div class="stat-card"><div class="stat-caption">Days Present</div><div class="stat-number" style="color: var(--present);" id="anPresentDays">0</div></div>
+          <div class="stat-card"><div class="stat-caption">Days Absent</div><div class="stat-number" style="color: var(--absent);" id="anAbsentDays">0</div></div>
+          <div class="stat-card"><div class="stat-caption">Tests Given</div><div class="stat-number" id="anTestsCount">0</div></div>
+        </div>
+
+        <h4 style="font-size: 14px; font-weight: 800; margin: 18px 0 10px; color: #1e1b4b;">📝 Test Evaluation History</h4>
+        <div id="anTestRecords" style="border: 1px solid var(--border); border-radius: 8px; max-height: 240px; overflow-y: auto; padding: 10px;"></div>
+      </div>
+    </div>
   </div>
 
   <!-- PARENT / STUDENT PANEL -->
   <div id="parentSection" style="display: none;">
-    <!-- Multiple Siblings Switcher Box -->
+    <!-- Sibling Switcher -->
     <div id="siblingSwitcherBox" style="display: none; background: #eef2ff; border: 1px solid #c7d2fe; padding: 14px 18px; border-radius: 14px; margin-bottom: 16px;">
-      <div style="font-size: 12px; font-weight: 800; color: #4338ca; margin-bottom: 8px;">👨‍👩‍👧 Siblings Found! Select Child to View Profile:</div>
+      <div style="font-size: 12px; font-weight: 800; color: #4338ca; margin-bottom: 8px;">👨‍👩‍👧 Siblings Found! Select Child:</div>
       <div id="siblingButtonsList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
     </div>
 
-    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 650px; margin: 0 auto; box-shadow: var(--shadow);">
+    <!-- Parent Compiled Report Filter Bar -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 24px; margin-bottom: 18px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+      <div style="flex: 1; min-width: 140px;">
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">QUICK TIME FILTER</label>
+        <select id="parentTimeRange" onchange="filterParentReport()" style="margin-top: 4px;">
+          <option value="3">Last 3 Days</option>
+          <option value="7">Last 7 Days</option>
+          <option value="10">Last 10 Days</option>
+          <option value="15">Last 15 Days</option>
+          <option value="30" selected>Last 30 Days</option>
+          <option value="all">All Days (Since Joining)</option>
+        </select>
+      </div>
+      <div style="flex: 1; min-width: 140px;">
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">SUBJECT FILTER</label>
+        <select id="parentSubjectFilter" onchange="filterParentReport()" style="margin-top: 4px;">
+          <option value="all">All Subjects</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Parent Progress Sheet -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 700px; margin: 0 auto; box-shadow: var(--shadow);">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 14px; margin-bottom: 16px;">
         <div>
           <h2 id="pViewName" style="font-size: 20px; font-weight: 800; color: #1e1b4b;">Student Name</h2>
           <p id="pViewClassRoll" style="font-size: 13px; color: var(--text-muted);">Class -- | Roll #--</p>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="openParentEditModal()">✏️ Update Basic Details</button>
+        <button class="btn btn-outline btn-sm" onclick="openParentEditModal()">✏️ Update Basic Info</button>
       </div>
 
-      <!-- Quick Status -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
-        <div style="background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center;">
-          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">TUITION FEE STATUS</div>
-          <div id="pViewFeeStatus" style="font-size: 16px; font-weight: 800; margin-top: 4px;">PAID ✅</div>
+      <!-- Quick Metrics -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px;">
+        <div style="background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">TODAY'S STATUS</div>
+          <div id="pViewTodayStatus" style="font-size: 15px; font-weight: 800; margin-top: 4px;">--</div>
         </div>
-        <div style="background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center;">
-          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">MONTHLY FEE</div>
-          <div id="pViewFeeAmount" style="font-size: 16px; font-weight: 800; margin-top: 4px; color: var(--primary);">₹0</div>
+        <div style="background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">ATTENDANCE RATE</div>
+          <div id="pViewAttendanceRate" style="font-size: 15px; font-weight: 800; margin-top: 4px; color: var(--primary);">0%</div>
+        </div>
+        <div style="background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">FEE STATUS</div>
+          <div id="pViewFeeStatus" style="font-size: 15px; font-weight: 800; margin-top: 4px;">PAID ✅</div>
         </div>
       </div>
 
@@ -331,8 +415,8 @@
       </div>
 
       <!-- Recent Test Results on Parent View -->
-      <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 8px; color: #1e1b4b;">📝 Test & Exam Evaluation</h4>
-      <div id="pViewTestContainer" style="border: 1px solid var(--border); border-radius: 8px; max-height: 200px; overflow-y: auto; background: #fff; margin-bottom: 18px; padding: 8px;">
+      <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 8px; color: #1e1b4b;">📝 Test & Exam Evaluation History</h4>
+      <div id="pViewTestContainer" style="border: 1px solid var(--border); border-radius: 8px; max-height: 240px; overflow-y: auto; background: #fff; margin-bottom: 18px; padding: 8px;">
         <p style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 12px;">Loading test history...</p>
       </div>
 
@@ -346,6 +430,39 @@
 </div>
 
 <!-- MODALS -->
+
+<!-- Modal: Holiday Manager (All Coaching vs Specific Batch) -->
+<div class="modal-backdrop" id="modalHoliday">
+  <div class="modal-dialog">
+    <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">🏖️ Manage Coaching Holidays</h3>
+    <div class="form-group">
+      <label>Select Holiday Date</label>
+      <input type="date" id="holidayDateInput">
+    </div>
+    <div class="form-group">
+      <label>Holiday Scope</label>
+      <select id="holidayScopeSelect" onchange="toggleHolidayBatchDropdown()">
+        <option value="ALL">🏫 Entire Coaching (All Batches Off)</option>
+        <option value="SPECIFIC">👥 Specific Class / Batch Only</option>
+      </select>
+    </div>
+    <div class="form-group" id="holidayBatchGroup" style="display: none;">
+      <label>Select Batch for Holiday</label>
+      <select id="holidaySpecificBatch"></select>
+    </div>
+    <div class="form-group">
+      <label>Reason / Note (Optional)</label>
+      <input type="text" id="holidayReasonInput" placeholder="e.g. Festival, Sunday, Maintenance">
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-top: 18px;">
+      <button class="btn btn-danger btn-sm" onclick="removeHoliday()">Remove Holiday</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-outline" onclick="closeModal('modalHoliday')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveHoliday()">Mark Holiday</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal: Change Coaching Name -->
 <div class="modal-backdrop" id="modalChangeName">
@@ -405,7 +522,6 @@
     <div class="form-group">
       <label>Roll Number *</label>
       <input type="number" id="newRoll" placeholder="e.g. 1, 2, 10">
-      <small>Numeric order for automatic attendance list.</small>
     </div>
     <div class="form-group">
       <label>Full Name *</label>
@@ -418,7 +534,7 @@
     <div class="form-group">
       <label>Admission Date 📅 *</label>
       <input type="date" id="newAdmissionDate">
-      <small>Attendance, tests, and fee dues begin strictly from this date.</small>
+      <small>Attendance & tests calculate strictly from this date.</small>
     </div>
     <div class="form-group">
       <label>Date of Birth (DOB) 🎂</label>
@@ -478,7 +594,7 @@
       <div class="slip-card">
         <div class="slip-header">
           <h2 class="dynamic-coaching-name">SHYAM COACHING CLASSES</h2>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Official Tuition Fee Payment Receipt Slip</p>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Official Fee Payment Receipt Slip</p>
         </div>
         <div class="slip-row"><span>Receipt Number:</span><strong id="slipReceiptId">#REC-000000</strong></div>
         <div class="slip-row"><span>Payment Date:</span><span id="slipPayDate">--/--/----</span></div>
@@ -507,7 +623,7 @@
       <div class="slip-card">
         <div class="slip-header">
           <h2 class="dynamic-coaching-name">SHYAM COACHING CLASSES</h2>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Official Evaluation & Performance Slip</p>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">Official Evaluation Slip</p>
         </div>
         <div class="slip-row"><span>Student Name:</span><strong id="scStudentName">--</strong></div>
         <div class="slip-row"><span>Roll & Batch:</span><span id="scRollBatch">--</span></div>
@@ -547,7 +663,7 @@
     </div>
     <div class="form-group">
       <label>Residential Area / Colony</label>
-      <textarea id="editParentAddress" rows="2" placeholder="Colony / Area, Jaipur"></textarea>
+      <textarea id="editParentAddress" rows="2"></textarea>
     </div>
     <div style="display:flex; justify-content:flex-end; gap: 8px; margin-top: 16px;">
       <button class="btn btn-outline" onclick="closeModal('modalParentEdit')">Cancel</button>
@@ -580,16 +696,18 @@
   let currentActiveTab = "attendance";
   let currentDayAttendance = {};
   let currentMonthFeeRecords = {};
-  let holidaysList = {};
+  let holidaysMap = {}; // { "YYYY-MM-DD": { scope: "ALL" | "SPECIFIC", batch: "" } }
 
   let availableTestsList = [];
   let currentActiveTest = null;
   
-  // Sibling State
+  // Sibling & Parent State
   let matchedSiblingsList = [];
   let currentParentStudent = null;
+  let parentCachedTests = [];
+  let parentAttendanceHistory = {};
 
-  // Date Initializations
+  // Setup Initial Dates
   const now = new Date();
   const todayDateStr = now.toISOString().split("T")[0];
   const thisMonthStr = todayDateStr.substring(0, 7);
@@ -598,6 +716,8 @@
   document.getElementById("newAdmissionDate").value = todayDateStr;
   document.getElementById("selectedMonth").value = thisMonthStr;
   document.getElementById("testDate").value = todayDateStr;
+  document.getElementById("holidayDateInput").value = todayDateStr;
+  document.getElementById("analyticsEndDate").value = todayDateStr;
 
   function showToast(msg) {
     const t = document.getElementById("toastBar");
@@ -619,7 +739,7 @@
     if (t) { t.classList.add("print-active"); window.print(); }
   }
 
-  // ================= 1. AUTO-LOGIN & SESSION RETENTION =================
+  // ================= AUTO-LOGIN & SESSION RETENTION =================
   window.addEventListener('DOMContentLoaded', () => {
     checkSavedSession();
   });
@@ -665,7 +785,53 @@
     }
   }
 
-  // ================= 2. SETTINGS & BRANDING =================
+  // ================= BIRTHDAY AUTOMATION ALERT =================
+  function checkAndDisplayBirthdays() {
+    const today = new Date();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const suffix = `-${mm}-${dd}`;
+
+    const bdayStudents = studentsList.filter(s => s.dob && s.dob.endsWith(suffix));
+    const container = document.getElementById("birthdayAlertBox");
+
+    if (!container) return;
+
+    if (bdayStudents.length === 0) {
+      container.style.display = "none";
+      container.innerHTML = "";
+      return;
+    }
+
+    container.style.display = "flex";
+    container.innerHTML = bdayStudents.map(s => {
+      const bdayMsg = encodeURIComponent(
+        `🎂 *HAPPY BIRTHDAY ${s.name.toUpperCase()}!* 🎉\n\n` +
+        `Dear Parents, wishing ${s.name} a very Happy Birthday from all of us at *${coachingInstituteName}*!\n` +
+        `May this year bring wisdom, good health, and glorious success in studies! 🌟📚\n\n` +
+        `Best Wishes,\n` +
+        `— *${coachingInstituteName}*`
+      );
+      const waUrl = `https://wa.me/91${s.phone}?text=${bdayMsg}`;
+
+      return `
+        <div class="bday-card">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 24px;">🎂</span>
+            <div>
+              <div style="font-weight: 800; font-size: 14px; color: #92400e;">Today's Birthday: ${s.name} (#${s.roll} - ${s.batch})</div>
+              <div style="font-size: 11px; color: #b45309;">Send coaching blessings directly to parent's WhatsApp!</div>
+            </div>
+          </div>
+          <a href="${waUrl}" target="_blank" class="btn wa-link" style="background: #16a34a;">
+            📲 Send Birthday Greeting
+          </a>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // ================= SETTINGS & BRANDING =================
   function initSettings() {
     db.collection("settings").doc("portalConfig").get().then(doc => {
       if (doc.exists) {
@@ -720,7 +886,7 @@
     showToast("Admin PIN reset successfully!");
   }
 
-  // ================= 3. BATCHES =================
+  // ================= BATCHES =================
   async function loadBatches() {
     try {
       const snap = await db.collection("batches").orderBy("name").get();
@@ -735,7 +901,7 @@
   }
 
   function populateBatchDropdowns() {
-    const ids = ["batchFilter", "newBatchSelect", "testBatchSelect"];
+    const ids = ["batchFilter", "newBatchSelect", "testBatchSelect", "holidaySpecificBatch", "analyticsBatchSelect"];
     ids.forEach(id => {
       const s = document.getElementById(id);
       if (!s) return;
@@ -782,7 +948,82 @@
     }
   }
 
-  // ================= 4. ROLE GATE & SIBLING DETECTION =================
+  // ================= HOLIDAYS SYSTEM (ALL COACHING VS BATCH-SPECIFIC) =================
+  function listenToHolidays() {
+    db.collection("settings").doc("holidays").onSnapshot(doc => {
+      holidaysMap = doc.exists ? (doc.data() || {}) : {};
+      updateHolidayBtnUI();
+      if (currentActiveTab === "attendance") renderAttendanceTable();
+    });
+  }
+
+  function openHolidayModal() {
+    document.getElementById("holidayDateInput").value = document.getElementById("attendanceDate").value;
+    const curDate = document.getElementById("holidayDateInput").value;
+    const curHoliday = holidaysMap[curDate];
+
+    if (curHoliday) {
+      document.getElementById("holidayScopeSelect").value = curHoliday.scope || "ALL";
+      document.getElementById("holidayReasonInput").value = curHoliday.reason || "";
+      if (curHoliday.scope === "SPECIFIC") {
+        document.getElementById("holidayBatchGroup").style.display = "block";
+        document.getElementById("holidaySpecificBatch").value = curHoliday.batch || activeBatches[0];
+      } else {
+        document.getElementById("holidayBatchGroup").style.display = "none";
+      }
+    } else {
+      document.getElementById("holidayScopeSelect").value = "ALL";
+      document.getElementById("holidayReasonInput").value = "";
+      document.getElementById("holidayBatchGroup").style.display = "none";
+    }
+    openModal("modalHoliday");
+  }
+
+  function toggleHolidayBatchDropdown() {
+    const scope = document.getElementById("holidayScopeSelect").value;
+    document.getElementById("holidayBatchGroup").style.display = scope === "SPECIFIC" ? "block" : "none";
+  }
+
+  async function saveHoliday() {
+    const date = document.getElementById("holidayDateInput").value;
+    const scope = document.getElementById("holidayScopeSelect").value;
+    const batch = scope === "SPECIFIC" ? document.getElementById("holidaySpecificBatch").value : "ALL";
+    const reason = document.getElementById("holidayReasonInput").value.trim();
+
+    if (!date) return showToast("Select date!");
+
+    const holidayData = { scope, batch, reason, updatedAt: Date.now() };
+    await db.collection("settings").doc("holidays").set({ [date]: holidayData }, { merge: true });
+    closeModal("modalHoliday");
+    showToast(`Holiday saved for ${date}!`);
+  }
+
+  async function removeHoliday() {
+    const date = document.getElementById("holidayDateInput").value;
+    if (!date) return;
+    await db.collection("settings").doc("holidays").update({
+      [date]: firebase.firestore.FieldValue.delete()
+    });
+    closeModal("modalHoliday");
+    showToast(`Holiday cleared for ${date}.`);
+  }
+
+  function updateHolidayBtnUI() {
+    const date = document.getElementById("attendanceDate").value;
+    const currentBatch = document.getElementById("batchFilter").value;
+    const btn = document.getElementById("btnToggleHoliday");
+    const h = holidaysMap[date];
+
+    if (h && (h.scope === "ALL" || (h.scope === "SPECIFIC" && h.batch === currentBatch))) {
+      btn.textContent = "🏖️ Holiday Active";
+      btn.className = "btn btn-danger btn-sm";
+    } else {
+      btn.textContent = "🏖️ Manage Holidays";
+      btn.className = "btn btn-holiday btn-sm";
+    }
+  }
+
+  // ================= ROLE GATE & SIBLING NAVIGATION =================
   function showPortalGate() {
     localStorage.removeItem("coaching_user_role");
     localStorage.removeItem("coaching_parent_student_id");
@@ -831,7 +1072,7 @@
     if (!phone) return showToast("Please enter a valid 10-digit mobile number!");
 
     db.collection("students").where("phone", "==", phone).get().then(snap => {
-      if (snap.empty) return showToast("❌ No students found registered with this phone!");
+      if (snap.empty) return showToast("❌ No students registered with this phone!");
 
       matchedSiblingsList = [];
       snap.forEach(doc => {
@@ -892,35 +1133,7 @@
     }
   }
 
-  // ================= 5. HOLIDAYS SYSTEM =================
-  function listenToHolidays() {
-    db.collection("settings").doc("holidays").onSnapshot(doc => {
-      holidaysList = doc.exists ? (doc.data() || {}) : {};
-      updateHolidayBtnUI();
-      if (currentActiveTab === "attendance") renderAttendanceTable();
-    });
-  }
-
-  function updateHolidayBtnUI() {
-    const date = document.getElementById("attendanceDate").value;
-    const btn = document.getElementById("btnToggleHoliday");
-    if (holidaysList[date]) {
-      btn.textContent = "🏖️ Holiday Marked (Click to Unmark)";
-      btn.className = "btn btn-danger btn-sm";
-    } else {
-      btn.textContent = "🏖️ Mark as Holiday";
-      btn.className = "btn btn-holiday btn-sm";
-    }
-  }
-
-  async function toggleCurrentDateHoliday() {
-    const date = document.getElementById("attendanceDate").value;
-    const isHoliday = !holidaysList[date];
-    await db.collection("settings").doc("holidays").set({ [date]: isHoliday }, { merge: true });
-    showToast(isHoliday ? `Marked ${date} as Holiday!` : `Holiday cleared for ${date}`);
-  }
-
-  // ================= 6. STUDENTS REALTIME =================
+  // ================= REALTIME STUDENTS =================
   function listenToStudents() {
     db.collection("students").onSnapshot(snap => {
       const arr = [];
@@ -942,6 +1155,7 @@
       });
       studentsList = arr.sort((a, b) => a.roll - b.roll);
       renderActiveAdminView();
+      checkAndDisplayBirthdays();
     });
   }
 
@@ -955,12 +1169,31 @@
     });
   }
 
-  // ================= 7. ADMIN TABS =================
+  // ================= ADMIN TABS =================
   function switchAdminTab(tab) {
     currentActiveTab = tab;
     document.getElementById("navAttendance").classList.toggle("active", tab === "attendance");
     document.getElementById("navFees").classList.toggle("active", tab === "fees");
     document.getElementById("navTests").classList.toggle("active", tab === "tests");
+    document.getElementById("navAnalytics").classList.toggle("active", tab === "analytics");
+
+    const controls = document.getElementById("adminControlsPanel");
+    const container = document.getElementById("adminTableContainer");
+    const analytics = document.getElementById("analyticsContainer");
+
+    if (tab === "analytics") {
+      controls.style.display = "none";
+      container.style.display = "none";
+      analytics.style.display = "block";
+      document.getElementById("statsAttendance").style.display = "none";
+      document.getElementById("statsFees").style.display = "none";
+      document.getElementById("statsTests").style.display = "none";
+      return;
+    }
+
+    controls.style.display = "grid";
+    container.style.display = "block";
+    analytics.style.display = "none";
 
     document.getElementById("ctrlDateAttendance").style.display = tab === "attendance" ? "flex" : "none";
     document.getElementById("ctrlHolidayBtn").style.display = tab === "attendance" ? "flex" : "none";
@@ -988,7 +1221,7 @@
     else if (currentActiveTab === "tests") renderTestsTable();
   }
 
-  // ================= 8. ATTENDANCE TAB =================
+  // ================= ATTENDANCE TAB =================
   function loadDateAttendance() {
     const date = document.getElementById("attendanceDate").value;
     updateHolidayBtnUI();
@@ -1013,11 +1246,13 @@
     tbody.innerHTML = "";
 
     const date = document.getElementById("attendanceDate").value;
-    const isDateHoliday = holidaysList[date];
+    const batch = document.getElementById("batchFilter").value;
+    const h = holidaysMap[date];
+    const isHoliday = h && (h.scope === "ALL" || (h.scope === "SPECIFIC" && h.batch === batch));
     const list = getFilteredStudents();
 
-    if (isDateHoliday) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:32px; background:var(--holiday-subtle); color:var(--holiday); font-weight:800;">🏖️ OFFICIAL COACHING HOLIDAY / OFF</td></tr>`;
+    if (isHoliday) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:32px; background:var(--holiday-subtle); color:var(--holiday); font-weight:800;">🏖️ OFFICIAL HOLIDAY / OFF (${h.scope === "ALL" ? "All Coaching" : `${batch} Only`}${h.reason ? ` - ${h.reason}` : ""})</td></tr>`;
       updateAttendanceKPIs(0, 0, 0);
       return;
     }
@@ -1102,7 +1337,7 @@
     document.getElementById("kpiAttendanceRate").textContent = total > 0 ? Math.round((p / total) * 100) + "%" : "0%";
   }
 
-  // ================= 9. FEES TAB =================
+  // ================= FEES TAB =================
   function loadFeeData() {
     const m = document.getElementById("selectedMonth").value;
     db.collection("fees").doc(m).get().then(doc => {
@@ -1225,7 +1460,7 @@
     openModal("modalFeeReceipt");
   }
 
-  // ================= 10. TESTS TAB =================
+  // ================= TESTS TAB =================
   function loadBatchTests() {
     const b = document.getElementById("batchFilter").value;
     const s = document.getElementById("activeTestSelect");
@@ -1442,7 +1677,87 @@
     openModal("modalScorecard");
   }
 
-  // ================= 11. STUDENT CRUD =================
+  // ================= ADMIN PERFORMANCE ANALYTICS (BY ROLL NUMBER) =================
+  async function generateStudentAnalytics() {
+    const batch = document.getElementById("analyticsBatchSelect").value;
+    const roll = parseInt(document.getElementById("analyticsRollInput").value.trim(), 10);
+    const start = document.getElementById("analyticsStartDate").value;
+    const end = document.getElementById("analyticsEndDate").value || todayDateStr;
+
+    if (isNaN(roll)) return showToast("Enter a valid roll number!");
+
+    const student = studentsList.find(s => s.batch === batch && s.roll === roll);
+    if (!student) return showToast(`No student found in ${batch} with Roll #${roll}!`);
+
+    document.getElementById("anName").textContent = student.name;
+    document.getElementById("anMeta").textContent = `${student.batch} | Roll #${student.roll} | Joined: ${student.admissionDate}`;
+
+    // 1. Fetch Attendance within range
+    const effectiveStart = start && start > student.admissionDate ? start : student.admissionDate;
+    const attSnap = await db.collection("attendance")
+      .where(firebase.firestore.FieldPath.documentId(), ">=", effectiveStart)
+      .where(firebase.firestore.FieldPath.documentId(), "<=", end)
+      .get();
+
+    let totalClasses = 0, present = 0, absent = 0;
+    attSnap.forEach(doc => {
+      const date = doc.id;
+      const h = holidaysMap[date];
+      const isHoliday = h && (h.scope === "ALL" || (h.scope === "SPECIFIC" && h.batch === student.batch));
+      if (!isHoliday) {
+        totalClasses++;
+        const status = doc.data()[student.id] || "Present";
+        if (status === "Present" || status === "Late") present++;
+        else if (status === "Absent") absent++;
+      }
+    });
+
+    const rate = totalClasses > 0 ? Math.round((present / totalClasses) * 100) : 0;
+    document.getElementById("anOverallRateBadge").textContent = `${rate}% Attendance`;
+    document.getElementById("anTotalClasses").textContent = totalClasses;
+    document.getElementById("anPresentDays").textContent = present;
+    document.getElementById("anAbsentDays").textContent = absent;
+
+    // 2. Fetch Tests History
+    const testsSnap = await db.collection("tests")
+      .where("batch", "==", student.batch)
+      .get();
+
+    const testRecordsDiv = document.getElementById("anTestRecords");
+    let testsAppeared = 0;
+    const testHtml = [];
+
+    testsSnap.forEach(d => {
+      const t = d.data();
+      if (t.date >= student.admissionDate && (!start || t.date >= start) && t.date <= end) {
+        testsAppeared++;
+        const sc = t.scores ? t.scores[student.id] : undefined;
+        const isAbs = sc === "ABSENT";
+        const hasScore = sc !== undefined && !isAbs;
+        const marks = hasScore ? Number(sc) : "--";
+        const max = t.maxMarks || 25;
+        const pct = hasScore ? Math.round((marks / max) * 100) : 0;
+
+        testHtml.push(`
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:8px 0; font-size:12px;">
+            <div>
+              <strong>${t.subject}</strong>: ${t.topic}
+              <div style="color:var(--text-muted); font-size:11px;">Exam Date: ${t.date}</div>
+            </div>
+            <span class="badge-score ${isAbs ? 'badge-absent-test' : (hasScore ? (pct >= 40 ? 'badge-pass' : 'badge-fail') : 'badge-na')}">
+              ${isAbs ? 'ABSENT' : `${marks} / ${max} (${pct}%)`}
+            </span>
+          </div>
+        `);
+      }
+    });
+
+    document.getElementById("anTestsCount").textContent = testsAppeared;
+    testRecordsDiv.innerHTML = testHtml.length > 0 ? testHtml.join("") : `<p style="font-size:12px; color:var(--text-muted); padding:6px;">No tests found in this date range.</p>`;
+    document.getElementById("analyticsReportCard").style.display = "block";
+  }
+
+  // ================= STUDENT CRUD =================
   function openAddStudentModal() {
     document.getElementById("newRoll").value = "";
     document.getElementById("newName").value = "";
@@ -1479,7 +1794,7 @@
     }
   }
 
-  // ================= 12. PARENT DASHBOARD & EVALUATION =================
+  // ================= PARENT DASHBOARD & COMPILED FILTER LOGIC =================
   async function renderParentDashboard() {
     if (!currentParentStudent) return;
     const s = currentParentStudent;
@@ -1492,9 +1807,8 @@
     document.getElementById("pViewPhone").textContent = s.phone || "--";
     document.getElementById("pViewAltPhone").textContent = s.altPhone || "None";
     document.getElementById("pViewAddress").textContent = s.address || "Not updated";
-    document.getElementById("pViewFeeAmount").textContent = "₹" + (s.feeAmount || 1000).toLocaleString('en-IN');
 
-    // Live Fee Check
+    // 1. Fee Status Check
     const feeDoc = await db.collection("fees").doc(thisMonthStr).get();
     const feeRecord = feeDoc.exists ? (feeDoc.data()[s.id] || {}) : {};
     const isPaid = feeRecord.status === "PAID";
@@ -1510,44 +1824,125 @@
     const msg = encodeURIComponent(`Namaste Sir, I am contacting you regarding my child ${s.name} (Roll #${s.roll}, ${s.batch}).`);
     document.getElementById("pTeacherWhatsappBtn").href = `https://wa.me/919876543210?text=${msg}`;
 
-    // Load Tests strictly on or after admission date
-    const testContainer = document.getElementById("pViewTestContainer");
-    testContainer.innerHTML = `<p style="font-size:12px; color:var(--text-muted); padding:10px;">Loading evaluations...</p>`;
-
+    // 2. Fetch All Conducted Tests & Unique Subjects
     const testsSnap = await db.collection("tests").where("batch", "==", s.batch).get();
-    if (testsSnap.empty) {
-      testContainer.innerHTML = `<p style="font-size:12px; color:var(--text-muted); padding:10px;">No tests conducted for this batch yet.</p>`;
-      return;
-    }
+    parentCachedTests = [];
+    const subjects = new Set();
 
-    const testCards = [];
     testsSnap.forEach(d => {
       const t = d.data();
       if (t.date >= s.admissionDate) {
-        const sc = t.scores ? t.scores[s.id] : undefined;
-        const isAbs = sc === "ABSENT";
-        const hasScore = sc !== undefined && !isAbs;
-        const marks = hasScore ? Number(sc) : "--";
-        const max = t.maxMarks || 25;
-        const pct = hasScore ? Math.round((marks / max) * 100) : 0;
-
-        testCards.push(`
-          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:8px 0; font-size:12px;">
-            <div>
-              <div style="font-weight:700; color:#1e1b4b;">${t.subject}: ${t.topic}</div>
-              <div style="color:var(--text-muted); font-size:11px;">Exam Date: ${t.date}</div>
-            </div>
-            <div style="text-align:right;">
-              <span class="badge-score ${isAbs ? 'badge-absent-test' : (hasScore ? (pct >= 40 ? 'badge-pass' : 'badge-fail') : 'badge-na')}">
-                ${isAbs ? 'ABSENT' : (hasScore ? `${marks} / ${max} (${pct}%)` : 'Not Evaluated')}
-              </span>
-            </div>
-          </div>
-        `);
+        parentCachedTests.push({ id: d.id, ...t });
+        if (t.subject) subjects.add(t.subject);
       }
     });
 
-    testContainer.innerHTML = testCards.length > 0 ? testCards.join("") : `<p style="font-size:12px; color:var(--text-muted); padding:10px;">No tests conducted after student's admission date.</p>`;
+    const subjectSelect = document.getElementById("parentSubjectFilter");
+    subjectSelect.innerHTML = `<option value="all">All Subjects</option>`;
+    subjects.forEach(sub => {
+      const opt = document.createElement("option");
+      opt.value = sub;
+      opt.textContent = sub;
+      subjectSelect.appendChild(opt);
+    });
+
+    // 3. Fetch Full Attendance Map since admission date
+    const attSnap = await db.collection("attendance")
+      .where(firebase.firestore.FieldPath.documentId(), ">=", s.admissionDate)
+      .get();
+
+    parentAttendanceHistory = {};
+    attSnap.forEach(doc => {
+      parentAttendanceHistory[doc.id] = doc.data()[s.id] || "Present";
+    });
+
+    // 4. Render with active filters
+    filterParentReport();
+  }
+
+  function filterParentReport() {
+    if (!currentParentStudent) return;
+    const s = currentParentStudent;
+    const rangeDays = document.getElementById("parentTimeRange").value;
+    const selectedSub = document.getElementById("parentSubjectFilter").value;
+
+    let cutoffDate = s.admissionDate;
+    if (rangeDays !== "all") {
+      const d = new Date();
+      d.setDate(d.getDate() - parseInt(rangeDays, 10));
+      const calcCutoff = d.toISOString().split("T")[0];
+      if (calcCutoff > cutoffDate) cutoffDate = calcCutoff;
+    }
+
+    // Attendance Calculation in Filtered Range
+    let eligibleDays = 0, pCount = 0;
+    Object.keys(parentAttendanceHistory).forEach(dateKey => {
+      if (dateKey >= cutoffDate && dateKey <= todayDateStr) {
+        const h = holidaysMap[dateKey];
+        const isHoliday = h && (h.scope === "ALL" || (h.scope === "SPECIFIC" && h.batch === s.batch));
+        if (!isHoliday) {
+          eligibleDays++;
+          const status = parentAttendanceHistory[dateKey];
+          if (status === "Present" || status === "Late") pCount++;
+        }
+      }
+    });
+
+    const rate = eligibleDays > 0 ? Math.round((pCount / eligibleDays) * 100) : 0;
+    document.getElementById("pViewAttendanceRate").textContent = `${rate}%`;
+
+    // Today's Status
+    const todayHoliday = holidaysMap[todayDateStr];
+    const isTodayHoliday = todayHoliday && (todayHoliday.scope === "ALL" || (todayHoliday.scope === "SPECIFIC" && todayHoliday.batch === s.batch));
+    const todayStatusEl = document.getElementById("pViewTodayStatus");
+
+    if (isTodayHoliday) {
+      todayStatusEl.textContent = "HOLIDAY 🏖️";
+      todayStatusEl.style.color = "var(--holiday)";
+    } else if (todayDateStr < s.admissionDate) {
+      todayStatusEl.textContent = "NOT ENROLLED";
+      todayStatusEl.style.color = "var(--text-muted)";
+    } else {
+      const st = parentAttendanceHistory[todayDateStr] || "Present";
+      todayStatusEl.textContent = st === "Present" ? "PRESENT ✓" : (st === "Late" ? "LATE ⚠️" : "ABSENT ❌");
+      todayStatusEl.style.color = st === "Present" ? "var(--present)" : (st === "Late" ? "var(--late)" : "var(--absent)");
+    }
+
+    // Filtered Tests
+    const container = document.getElementById("pViewTestContainer");
+    const filteredTests = parentCachedTests.filter(t => {
+      const inDate = t.date >= cutoffDate;
+      const inSub = selectedSub === "all" || t.subject === selectedSub;
+      return inDate && inSub;
+    });
+
+    if (filteredTests.length === 0) {
+      container.innerHTML = `<p style="font-size:12px; color:var(--text-muted); padding:10px; text-align:center;">No tests found for the selected time & subject filter.</p>`;
+      return;
+    }
+
+    container.innerHTML = filteredTests.map(t => {
+      const sc = t.scores ? t.scores[s.id] : undefined;
+      const isAbs = sc === "ABSENT";
+      const hasScore = sc !== undefined && !isAbs;
+      const marks = hasScore ? Number(sc) : "--";
+      const max = t.maxMarks || 25;
+      const pct = hasScore ? Math.round((marks / max) * 100) : 0;
+
+      return `
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:8px 0; font-size:12px;">
+          <div>
+            <div style="font-weight:700; color:#1e1b4b;">${t.subject}: ${t.topic}</div>
+            <div style="color:var(--text-muted); font-size:11px;">Exam Date: ${t.date}</div>
+          </div>
+          <div style="text-align:right;">
+            <span class="badge-score ${isAbs ? 'badge-absent-test' : (hasScore ? (pct >= 40 ? 'badge-pass' : 'badge-fail') : 'badge-na')}">
+              ${isAbs ? 'ABSENT' : (hasScore ? `${marks} / ${max} (${pct}%)` : 'Pending')}
+            </span>
+          </div>
+        </div>
+      `;
+    }).join("");
   }
 
   function openParentEditModal() {
@@ -1571,7 +1966,6 @@
     await db.collection("students").doc(currentParentStudent.id).update(payload);
     currentParentStudent = { ...currentParentStudent, ...payload };
     
-    // Matched list update
     const idx = matchedSiblingsList.findIndex(x => x.id === currentParentStudent.id);
     if (idx !== -1) matchedSiblingsList[idx] = currentParentStudent;
 
